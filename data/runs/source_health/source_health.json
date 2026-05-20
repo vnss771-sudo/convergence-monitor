@@ -1,0 +1,72 @@
+{
+  "sources": {
+    "bis": {
+      "counts": {
+        "fetched": 5,
+        "saved": 0,
+        "skipped_existing": 5
+      },
+      "error": null,
+      "last_checked_at": "2026-05-19T22:24:44Z",
+      "last_failure_at": "2026-05-19T20:40:03Z",
+      "last_success_at": "2026-05-19T22:24:44Z",
+      "source_id": "bis",
+      "status": "ok"
+    },
+    "ecb": {
+      "counts": {
+        "fetched": 5,
+        "saved": 0,
+        "skipped_existing": 5
+      },
+      "error": null,
+      "last_checked_at": "2026-05-19T22:24:44Z",
+      "last_failure_at": "2026-05-19T14:32:14Z",
+      "last_success_at": "2026-05-19T22:24:44Z",
+      "source_id": "ecb",
+      "status": "ok"
+    },
+    "federal_reserve": {
+      "counts": {
+        "fetched": 5,
+        "saved": 0,
+        "skipped_existing": 5
+      },
+      "error": null,
+      "last_checked_at": "2026-05-19T22:24:44Z",
+      "last_success_at": "2026-05-19T22:24:44Z",
+      "source_id": "federal_reserve",
+      "status": "ok"
+    },
+    "imf": {
+      "counts": {
+        "fetched": 0,
+        "saved": 0,
+        "skipped_existing": 0
+      },
+      "error": {
+        "message": "Source returned no usable documents: imf",
+        "source_id": "imf",
+        "type": "source_empty"
+      },
+      "last_checked_at": "2026-05-19T22:24:44Z",
+      "last_failure_at": "2026-05-19T22:24:44Z",
+      "source_id": "imf",
+      "status": "error"
+    },
+    "rba": {
+      "counts": {
+        "fetched": 1,
+        "saved": 0,
+        "skipped_existing": 1
+      },
+      "error": null,
+      "last_checked_at": "2026-05-19T22:24:44Z",
+      "last_failure_at": "2026-05-19T20:40:03Z",
+      "last_success_at": "2026-05-19T22:24:44Z",
+      "source_id": "rba",
+      "status": "ok"
+    }
+  },
+  "updated_at": "2026-05-19T22:24:44Z"
+}

@@ -1,0 +1,223 @@
+{
+  "acceptance": {
+    "alert_generated": true,
+    "baseline_available": false,
+    "checks": [
+      {
+        "message": "Artifact must come from the verify-live command.",
+        "name": "operation_is_verify_live",
+        "severity": "required",
+        "status": "pass"
+      },
+      {
+        "message": "Verification status must be ok or degraded, not error.",
+        "name": "verification_status_usable",
+        "severity": "required",
+        "status": "pass"
+      },
+      {
+        "message": "At least one live document must be ingested.",
+        "name": "live_documents_ingested",
+        "severity": "required",
+        "status": "pass"
+      },
+      {
+        "message": "At least one live document must be classified.",
+        "name": "live_documents_classified",
+        "severity": "required",
+        "status": "pass"
+      },
+      {
+        "message": "A score must be generated from live evidence.",
+        "name": "score_generated",
+        "severity": "required",
+        "status": "pass"
+      },
+      {
+        "message": "An alert JSON must be generated from live evidence.",
+        "name": "alert_generated",
+        "severity": "required",
+        "status": "pass"
+      },
+      {
+        "message": "At least one configured source must return usable documents.",
+        "name": "source_available",
+        "severity": "required",
+        "status": "pass"
+      },
+      {
+        "message": "Source outcome counts are internally consistent.",
+        "name": "source_count_consistency",
+        "severity": "required",
+        "status": "pass"
+      },
+      {
+        "message": "Critical live-verification warnings must be absent.",
+        "name": "no_critical_warnings",
+        "severity": "required",
+        "status": "pass"
+      },
+      {
+        "message": "One or more sources were empty, disabled, or failed.",
+        "name": "all_sources_ok",
+        "severity": "advisory",
+        "status": "warn"
+      },
+      {
+        "message": "Verification status is degraded; operator review is required.",
+        "name": "verification_not_degraded",
+        "severity": "advisory",
+        "status": "warn"
+      },
+      {
+        "message": "Baseline is unavailable; accept only with explicit operator note.",
+        "name": "baseline_available",
+        "severity": "advisory",
+        "status": "warn"
+      },
+      {
+        "message": "Verification warnings are present and require operator review.",
+        "name": "warnings_empty",
+        "severity": "advisory",
+        "status": "warn"
+      }
+    ],
+    "decision": "accepted_degraded",
+    "documents_classified": 16,
+    "documents_ingested": 16,
+    "generated_at": "2026-05-19T22:23:24Z",
+    "operation": "accept_live",
+    "operator_actions": [
+      "Record an operator note explaining degraded acceptance.",
+      "Review source warnings before archiving the run."
+    ],
+    "scenario_id": "cbdc_payment_resilience",
+    "score_generated": true,
+    "source_failure_count": 1,
+    "sources_ok": 4,
+    "sources_total": 5,
+    "status": "ok",
+    "verification_path": "data/runs/live_verifications/20260519T222324Z_verify_live_cbdc_payment_resilience_30d.json",
+    "verification_status": "degraded",
+    "warnings": [
+      "source_empty:imf"
+    ],
+    "window_days": 30
+  },
+  "archive_recommendation": {
+    "action": "archive_with_operator_note",
+    "message": "Archive only with an operator note explaining degraded acceptance."
+  },
+  "artifact_paths": {
+    "alert_path": "data/processed/cbdc_payment_resilience_alert.json",
+    "classified_path": "data/processed/cbdc_payment_resilience_classified.jsonl",
+    "raw_paths": {
+      "bis": "data/raw/bis.jsonl",
+      "ecb": "data/raw/ecb.jsonl",
+      "federal_reserve": "data/raw/federal_reserve.jsonl",
+      "imf": "data/raw/imf.jsonl",
+      "rba": "data/raw/rba.jsonl"
+    },
+    "run_snapshot_path": "data/runs/20260519T222324Z_verify_live_cbdc_payment_resilience_30d.json",
+    "score_path": "data/processed/cbdc_payment_resilience_score.json",
+    "verification_path": "data/runs/live_verifications/20260519T222324Z_verify_live_cbdc_payment_resilience_30d.json"
+  },
+  "decision": "accepted_degraded",
+  "generated_at": "2026-05-19T22:23:24Z",
+  "operation": "live_review_pack",
+  "operator_questions": [
+    "Does the accepted evidence directly support the scenario, not just keyword overlap?",
+    "Are source failures isolated and explained rather than hidden?",
+    "Does the alert remain conservative relative to the evidence count and confidence?",
+    "Is there a written reason for accepting this degraded run?",
+    "Is baseline_unavailable acceptable for this review context?"
+  ],
+  "require_baseline": false,
+  "review_pack_path": "data/runs/live_reviews/20260519T222324Z_live_review_cbdc_payment_resilience_30d.json",
+  "source_summary": {
+    "groups": {
+      "disabled": [],
+      "empty": [
+        {
+          "error": {
+            "message": "Source returned no usable documents: imf",
+            "source_id": "imf",
+            "type": "source_empty"
+          },
+          "fetched": 0,
+          "raw_path": "data/raw/imf.jsonl",
+          "saved": 0,
+          "skipped_existing": 0,
+          "source_id": "imf",
+          "source_name": "International Monetary Fund",
+          "status": "empty"
+        }
+      ],
+      "network_error": [],
+      "ok": [
+        {
+          "fetched": 5,
+          "raw_path": "data/raw/bis.jsonl",
+          "saved": 0,
+          "skipped_existing": 5,
+          "source_id": "bis",
+          "source_name": "Bank for International Settlements",
+          "status": "ok"
+        },
+        {
+          "fetched": 1,
+          "raw_path": "data/raw/rba.jsonl",
+          "saved": 0,
+          "skipped_existing": 1,
+          "source_id": "rba",
+          "source_name": "Reserve Bank of Australia",
+          "status": "ok"
+        },
+        {
+          "fetched": 5,
+          "raw_path": "data/raw/federal_reserve.jsonl",
+          "saved": 0,
+          "skipped_existing": 5,
+          "source_id": "federal_reserve",
+          "source_name": "Federal Reserve",
+          "status": "ok"
+        },
+        {
+          "fetched": 5,
+          "raw_path": "data/raw/ecb.jsonl",
+          "saved": 0,
+          "skipped_existing": 5,
+          "source_id": "ecb",
+          "source_name": "European Central Bank",
+          "status": "ok"
+        }
+      ],
+      "parse_error": [],
+      "timeout": []
+    },
+    "sources_disabled": 0,
+    "sources_empty": 1,
+    "sources_network_error": 0,
+    "sources_ok": 4,
+    "sources_parse_error": 0,
+    "sources_timeout": 0,
+    "sources_total": 5
+  },
+  "status": "ok",
+  "summary": {
+    "alert_generated": true,
+    "baseline_available": false,
+    "confidence": "low",
+    "documents_classified": 16,
+    "documents_ingested": 16,
+    "generated_at": "2026-05-19T22:23:24Z",
+    "scenario_id": "cbdc_payment_resilience",
+    "scenario_name": "Cross-border CBDC and payment-system resilience convergence",
+    "score_generated": true,
+    "verification_status": "degraded",
+    "window_days": 30
+  },
+  "warnings": [
+    "source_empty:imf"
+  ]
+}

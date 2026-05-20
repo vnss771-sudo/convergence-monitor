@@ -1,0 +1,37 @@
+scenarios:
+  - id: cbdc_payment_resilience
+    name: Cross-border CBDC and payment-system resilience convergence
+    description: >
+      Detects elevated public institutional activity around CBDCs,
+      cross-border payments, settlement infrastructure, programmable money,
+      payment-system resilience, financial-market infrastructure, and
+      central-bank digital settlement systems.
+    primary_terms:
+      - cbdc
+      - central bank digital currency
+      - cross-border payments
+      - payment system resilience
+      - settlement infrastructure
+      - digital settlement
+      - programmable money
+      - tokenised deposits
+      - financial market infrastructure
+    secondary_terms:
+      - wholesale cbdc
+      - retail cbdc
+      - instant payments
+      - iso 20022
+      - tokenisation
+      - central bank money
+      - payment rails
+      - correspondent banking
+      - liquidity bridge
+    exclusion_terms:
+      - cryptocurrency price
+      - bitcoin trading
+      - speculative token
+      - meme coin
+    relevance_rules:
+      central_min_primary_matches: 2
+      central_min_total_matches: 4
+      incidental_min_total_matches: 1

@@ -1,0 +1,80 @@
+{
+  "status": "degraded",
+  "operation": "verify_live",
+  "scenario_id": "cbdc_payment_resilience",
+  "scenario_name": "Cross-border CBDC and payment-system resilience convergence",
+  "generated_at": "2026-05-19T22:23:46Z",
+  "window_days": 30,
+  "limit": 5,
+  "sources_total": 5,
+  "sources_ok": 4,
+  "sources_empty": 1,
+  "sources_timeout": 0,
+  "sources_parse_error": 0,
+  "sources_network_error": 0,
+  "sources_disabled": 0,
+  "documents_ingested": 16,
+  "documents_saved": 0,
+  "documents_classified": 16,
+  "score_generated": true,
+  "alert_generated": true,
+  "baseline_available": false,
+  "confidence": "low",
+  "source_outcomes": [
+    {
+      "source_id": "bis",
+      "source_name": "Bank for International Settlements",
+      "status": "ok",
+      "fetched": 5,
+      "saved": 0,
+      "skipped_existing": 5,
+      "raw_path": "data/raw/bis.jsonl"
+    },
+    {
+      "source_id": "imf",
+      "source_name": "International Monetary Fund",
+      "status": "empty",
+      "fetched": 0,
+      "saved": 0,
+      "skipped_existing": 0,
+      "raw_path": "data/raw/imf.jsonl",
+      "error": {
+        "source_id": "imf",
+        "type": "source_empty",
+        "message": "Source returned no usable documents: imf"
+      }
+    },
+    {
+      "source_id": "rba",
+      "source_name": "Reserve Bank of Australia",
+      "status": "ok",
+      "fetched": 1,
+      "saved": 0,
+      "skipped_existing": 1,
+      "raw_path": "data/raw/rba.jsonl"
+    },
+    {
+      "source_id": "federal_reserve",
+      "source_name": "Federal Reserve",
+      "status": "ok",
+      "fetched": 5,
+      "saved": 0,
+      "skipped_existing": 5,
+      "raw_path": "data/raw/federal_reserve.jsonl"
+    },
+    {
+      "source_id": "ecb",
+      "source_name": "European Central Bank",
+      "status": "ok",
+      "fetched": 5,
+      "saved": 0,
+      "skipped_existing": 5,
+      "raw_path": "data/raw/ecb.jsonl"
+    }
+  ],
+  "warnings": [
+    "source_empty:imf"
+  ],
+  "verification_path": "data/runs/live_verifications/20260519T222346Z_verify_live_cbdc_payment_resilience_30d.json",
+  "run_snapshot_path": "data/runs/20260519T222346Z_verify_live_cbdc_payment_resilience_30d.json"
+}

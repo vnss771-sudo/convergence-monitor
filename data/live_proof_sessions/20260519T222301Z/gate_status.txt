@@ -1,0 +1,2 @@
+pip_install_rc=1
+ruff_rc=1

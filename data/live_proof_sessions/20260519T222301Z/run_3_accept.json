@@ -1,0 +1,105 @@
+{
+  "status": "ok",
+  "operation": "accept_live",
+  "decision": "accepted_degraded",
+  "verification_path": "data/runs/live_verifications/20260519T222335Z_verify_live_cbdc_payment_resilience_30d.json",
+  "scenario_id": "cbdc_payment_resilience",
+  "window_days": 30,
+  "verification_status": "degraded",
+  "generated_at": "2026-05-19T22:23:35Z",
+  "documents_ingested": 16,
+  "documents_classified": 16,
+  "score_generated": true,
+  "alert_generated": true,
+  "baseline_available": false,
+  "sources_total": 5,
+  "sources_ok": 4,
+  "source_failure_count": 1,
+  "warnings": [
+    "source_empty:imf"
+  ],
+  "checks": [
+    {
+      "name": "operation_is_verify_live",
+      "status": "pass",
+      "severity": "required",
+      "message": "Artifact must come from the verify-live command."
+    },
+    {
+      "name": "verification_status_usable",
+      "status": "pass",
+      "severity": "required",
+      "message": "Verification status must be ok or degraded, not error."
+    },
+    {
+      "name": "live_documents_ingested",
+      "status": "pass",
+      "severity": "required",
+      "message": "At least one live document must be ingested."
+    },
+    {
+      "name": "live_documents_classified",
+      "status": "pass",
+      "severity": "required",
+      "message": "At least one live document must be classified."
+    },
+    {
+      "name": "score_generated",
+      "status": "pass",
+      "severity": "required",
+      "message": "A score must be generated from live evidence."
+    },
+    {
+      "name": "alert_generated",
+      "status": "pass",
+      "severity": "required",
+      "message": "An alert JSON must be generated from live evidence."
+    },
+    {
+      "name": "source_available",
+      "status": "pass",
+      "severity": "required",
+      "message": "At least one configured source must return usable documents."
+    },
+    {
+      "name": "source_count_consistency",
+      "status": "pass",
+      "severity": "required",
+      "message": "Source outcome counts are internally consistent."
+    },
+    {
+      "name": "no_critical_warnings",
+      "status": "pass",
+      "severity": "required",
+      "message": "Critical live-verification warnings must be absent."
+    },
+    {
+      "name": "all_sources_ok",
+      "status": "warn",
+      "severity": "advisory",
+      "message": "One or more sources were empty, disabled, or failed."
+    },
+    {
+      "name": "verification_not_degraded",
+      "status": "warn",
+      "severity": "advisory",
+      "message": "Verification status is degraded; operator review is required."
+    },
+    {
+      "name": "baseline_available",
+      "status": "warn",
+      "severity": "advisory",
+      "message": "Baseline is unavailable; accept only with explicit operator note."
+    },
+    {
+      "name": "warnings_empty",
+      "status": "warn",
+      "severity": "advisory",
+      "message": "Verification warnings are present and require operator review."
+    }
+  ],
+  "operator_actions": [
+    "Record an operator note explaining degraded acceptance.",
+    "Review source warnings before archiving the run."
+  ]
+}

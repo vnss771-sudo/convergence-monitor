@@ -1,0 +1,80 @@
+{
+  "alert_generated": true,
+  "baseline_available": false,
+  "confidence": "low",
+  "documents_classified": 16,
+  "documents_ingested": 16,
+  "documents_saved": 0,
+  "generated_at": "2026-05-19T22:23:55Z",
+  "limit": 5,
+  "operation": "verify_live",
+  "run_snapshot_path": "data/runs/20260519T222355Z_verify_live_cbdc_payment_resilience_30d.json",
+  "scenario_id": "cbdc_payment_resilience",
+  "scenario_name": "Cross-border CBDC and payment-system resilience convergence",
+  "score_generated": true,
+  "source_outcomes": [
+    {
+      "fetched": 5,
+      "raw_path": "data/raw/bis.jsonl",
+      "saved": 0,
+      "skipped_existing": 5,
+      "source_id": "bis",
+      "source_name": "Bank for International Settlements",
+      "status": "ok"
+    },
+    {
+      "error": {
+        "message": "Source returned no usable documents: imf",
+        "source_id": "imf",
+        "type": "source_empty"
+      },
+      "fetched": 0,
+      "raw_path": "data/raw/imf.jsonl",
+      "saved": 0,
+      "skipped_existing": 0,
+      "source_id": "imf",
+      "source_name": "International Monetary Fund",
+      "status": "empty"
+    },
+    {
+      "fetched": 1,
+      "raw_path": "data/raw/rba.jsonl",
+      "saved": 0,
+      "skipped_existing": 1,
+      "source_id": "rba",
+      "source_name": "Reserve Bank of Australia",
+      "status": "ok"
+    },
+    {
+      "fetched": 5,
+      "raw_path": "data/raw/federal_reserve.jsonl",
+      "saved": 0,
+      "skipped_existing": 5,
+      "source_id": "federal_reserve",
+      "source_name": "Federal Reserve",
+      "status": "ok"
+    },
+    {
+      "fetched": 5,
+      "raw_path": "data/raw/ecb.jsonl",
+      "saved": 0,
+      "skipped_existing": 5,
+      "source_id": "ecb",
+      "source_name": "European Central Bank",
+      "status": "ok"
+    }
+  ],
+  "sources_disabled": 0,
+  "sources_empty": 1,
+  "sources_network_error": 0,
+  "sources_ok": 4,
+  "sources_parse_error": 0,
+  "sources_timeout": 0,
+  "sources_total": 5,
+  "status": "degraded",
+  "verification_path": "data/runs/live_verifications/20260519T222355Z_verify_live_cbdc_payment_resilience_30d.json",
+  "warnings": [
+    "source_empty:imf"
+  ],
+  "window_days": 30
+}

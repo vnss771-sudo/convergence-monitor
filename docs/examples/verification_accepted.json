@@ -1,0 +1,73 @@
+{
+  "alert_generated": true,
+  "baseline_available": true,
+  "confidence": "medium",
+  "documents_classified": 14,
+  "documents_ingested": 14,
+  "documents_saved": 14,
+  "generated_at": "2026-05-19T00:00:00Z",
+  "limit": 10,
+  "operation": "verify_live",
+  "run_snapshot_path": "data/runs/verify_live_cbdc_payment_resilience_20260519T000000Z_30d.json",
+  "scenario_id": "cbdc_payment_resilience",
+  "scenario_name": "Cross-border CBDC and payment-system resilience convergence",
+  "score_generated": true,
+  "source_outcomes": [
+    {
+      "fetched": 3,
+      "raw_path": "data/raw/bis.jsonl",
+      "saved": 3,
+      "skipped_existing": 0,
+      "source_id": "bis",
+      "source_name": "Bank for International Settlements",
+      "status": "ok"
+    },
+    {
+      "fetched": 3,
+      "raw_path": "data/raw/imf.jsonl",
+      "saved": 3,
+      "skipped_existing": 0,
+      "source_id": "imf",
+      "source_name": "International Monetary Fund",
+      "status": "ok"
+    },
+    {
+      "fetched": 2,
+      "raw_path": "data/raw/rba.jsonl",
+      "saved": 2,
+      "skipped_existing": 0,
+      "source_id": "rba",
+      "source_name": "Reserve Bank of Australia",
+      "status": "ok"
+    },
+    {
+      "fetched": 3,
+      "raw_path": "data/raw/federal_reserve.jsonl",
+      "saved": 3,
+      "skipped_existing": 0,
+      "source_id": "federal_reserve",
+      "source_name": "Federal Reserve",
+      "status": "ok"
+    },
+    {
+      "fetched": 3,
+      "raw_path": "data/raw/ecb.jsonl",
+      "saved": 3,
+      "skipped_existing": 0,
+      "source_id": "ecb",
+      "source_name": "European Central Bank",
+      "status": "ok"
+    }
+  ],
+  "sources_disabled": 0,
+  "sources_empty": 0,
+  "sources_network_error": 0,
+  "sources_ok": 5,
+  "sources_parse_error": 0,
+  "sources_timeout": 0,
+  "sources_total": 5,
+  "status": "ok",
+  "verification_path": "data/runs/live_verifications/verify_live_cbdc_payment_resilience_20260519T000000Z_30d.json",
+  "warnings": [],
+  "window_days": 30
+}
