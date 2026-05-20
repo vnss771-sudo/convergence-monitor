@@ -127,6 +127,10 @@ def test_multi_source_ingest_reports_degraded_status(tmp_path: Path, monkeypatch
     assert health_payload["status"] == "ok"
     assert health_payload["sources"]["imf"]["status"] == "error"
     assert health_payload["sources"]["bis"]["status"] == "ok"
+    assert health_payload["summary"]["overall"] == "degraded"
+    assert health_payload["summary"]["failure_types"] == {"ingestion_error": 1}
+    assert health_payload["summary"]["failed_sources"][0]["source_id"] == "imf"
+    assert health_payload["summary"]["failed_sources"][0]["error_type"] == "ingestion_error"
 
 
 def test_unknown_source_failure_is_structured_json(tmp_path: Path) -> None:

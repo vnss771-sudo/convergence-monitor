@@ -7,7 +7,7 @@ from typing import Any
 from pydantic import ValidationError
 
 from app.alerts.generator import load_score_json
-from app.ingestion.failures import load_source_health
+from app.ingestion.failures import load_source_health, summarize_source_health_payload
 from app.models import AlertRecord, ConfigBundle, ScenarioScoreRecord
 from app.runs.snapshots import list_run_snapshots
 from app.scoring.baselines import baseline_show_payload, compare_score_to_baseline
@@ -96,37 +96,10 @@ def source_health_summary(
 ) -> dict[str, Any]:
     enabled_source_ids = [source.id for source in bundle.enabled_sources]
     health_payload = load_source_health(runs_dir)
-    health_sources = health_payload.get("sources", {})
-
-    sources_ok = 0
-    sources_error = 0
-    sources_unknown = 0
-
-    for source_id in enabled_source_ids:
-        status = health_sources.get(source_id, {}).get("status")
-        if status == "ok":
-            sources_ok += 1
-        elif status is None:
-            sources_unknown += 1
-        else:
-            sources_error += 1
-
-    if not enabled_source_ids:
-        overall = "unavailable"
-    elif sources_error:
-        overall = "degraded" if sources_ok or sources_unknown else "error"
-    elif sources_unknown:
-        overall = "unknown"
-    else:
-        overall = "ok"
-
-    return {
-        "sources_total": len(enabled_source_ids),
-        "sources_ok": sources_ok,
-        "sources_error": sources_error,
-        "sources_unknown": sources_unknown,
-        "overall": overall,
-    }
+    return summarize_source_health_payload(
+        health_payload,
+        expected_source_ids=enabled_source_ids,
+    )
 
 
 def latest_run_statuses(
