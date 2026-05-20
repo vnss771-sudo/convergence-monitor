@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 import json
+
+import pytest
 from pathlib import Path
 
 from app.ingestion.rss_base import (
+    EmptyFeedError,
     fetch_rss_documents,
     make_content_hash,
     make_document_id,
@@ -110,7 +113,7 @@ def test_save_documents_jsonl_writes_one_record_per_line(tmp_path: Path) -> None
 def test_fetch_rss_documents_uses_source_and_limit(monkeypatch) -> None:
     source = make_source()
 
-    def fake_fetch_payload(_source: Source) -> bytes:
+    def fake_fetch_payload(_source: Source, timeout_seconds: float = 20.0) -> bytes:
         return b"fake"
 
     def fake_parse_payload(_payload: bytes, _source_id: str) -> list[dict]:
@@ -137,3 +140,52 @@ def test_fetch_rss_documents_uses_source_and_limit(monkeypatch) -> None:
     assert len(documents) == 1
     assert documents[0].source_id == "bis"
     assert documents[0].title == "CBDC item 1"
+
+
+def test_fetch_rss_documents_tracks_skipped_invalid_entries(monkeypatch) -> None:
+    source = make_source()
+
+    def fake_fetch_payload(_source: Source, timeout_seconds: float = 20.0) -> bytes:
+        assert timeout_seconds == 7.5
+        return b"fake"
+
+    def fake_parse_payload(_payload: bytes, _source_id: str) -> list[dict]:
+        return [
+            {
+                "title": "Missing URL",
+                "published": "2026-05-19",
+                "summary": "Skipped because no URL, id, or guid exists.",
+            },
+            {
+                "title": "CBDC item",
+                "link": "https://example.com/valid",
+                "published": "2026-05-19",
+                "summary": "Cross-border payments.",
+            },
+        ]
+
+    monkeypatch.setattr("app.ingestion.rss_base.fetch_rss_payload", fake_fetch_payload)
+    monkeypatch.setattr("app.ingestion.rss_base.parse_rss_payload", fake_parse_payload)
+
+    documents = fetch_rss_documents(source, limit=10, timeout_seconds=7.5)
+
+    assert len(documents) == 1
+    assert documents.fetched_entries == 2
+    assert documents.skipped_invalid_entries == 1
+    assert documents[0].url == "https://example.com/valid"
+
+
+def test_fetch_rss_documents_raises_empty_feed(monkeypatch) -> None:
+    source = make_source()
+
+    def fake_fetch_payload(_source: Source, timeout_seconds: float = 20.0) -> bytes:
+        return b"fake"
+
+    def fake_parse_payload(_payload: bytes, _source_id: str) -> list[dict]:
+        return []
+
+    monkeypatch.setattr("app.ingestion.rss_base.fetch_rss_payload", fake_fetch_payload)
+    monkeypatch.setattr("app.ingestion.rss_base.parse_rss_payload", fake_parse_payload)
+
+    with pytest.raises(EmptyFeedError, match="returned no feed entries"):
+        fetch_rss_documents(source, limit=10)
