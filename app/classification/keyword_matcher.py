@@ -73,11 +73,60 @@ def _term_pattern(term: str) -> re.Pattern[str]:
     return re.compile(rf"(?<!\w){escaped}(?!\w)", re.IGNORECASE)
 
 
+def _sentence_prefix(text: str, match_start: int) -> str:
+    sentence_start = max(
+        text.rfind(".", 0, match_start),
+        text.rfind("!", 0, match_start),
+        text.rfind("?", 0, match_start),
+        text.rfind(";", 0, match_start),
+    )
+    return text[sentence_start + 1 : match_start]
+
+
+def _has_sentence_level_negation(prefix: str) -> bool:
+    negation_markers = (
+        "not a",
+        "not an",
+        "not the",
+        "no",
+        "unrelated to",
+        "not about",
+        "not related to",
+        "excluded from",
+        "outside the scope of",
+        "out of scope for",
+        "without",
+        "does not cover",
+        "does not concern",
+        "does not involve",
+        "does not address",
+        "does not relate to",
+        "does not represent",
+        "does not include",
+        "do not cover",
+        "do not concern",
+        "do not involve",
+        "do not address",
+        "do not relate to",
+        "do not represent",
+        "do not include",
+        "is not",
+        "are not",
+        "was not",
+        "were not",
+    )
+    normalized = f" {normalize_text(prefix)} "
+    return any(f" {marker} " in normalized for marker in negation_markers)
+
+
 def _is_negated_match(text: str, match_start: int) -> bool:
     window_start = max(0, match_start - NEGATION_WINDOW_CHARS)
     prefix = text[window_start:match_start]
 
-    return any(pattern.search(prefix) for pattern in NEGATION_PREFIX_PATTERNS)
+    if any(pattern.search(prefix) for pattern in NEGATION_PREFIX_PATTERNS):
+        return True
+
+    return _has_sentence_level_negation(_sentence_prefix(text, match_start))
 
 
 def _has_unnegated_term(text: str, term: str) -> bool:
