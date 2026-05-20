@@ -37,7 +37,7 @@ def test_single_source_failure_returns_structured_json_and_health(
     def failing_fetch(_source: Source, limit: int = 10, timeout_seconds: float = 20.0):
         raise IngestionError("fixture network failure")
 
-    monkeypatch.setattr("app.cli.fetch_rss_documents", failing_fetch)
+    monkeypatch.setattr("app.commands.ingest.fetch_rss_documents", failing_fetch)
 
     result = runner.invoke(
         app,
@@ -85,7 +85,7 @@ def test_multi_source_ingest_reports_degraded_status(tmp_path: Path, monkeypatch
             raise IngestionError("fixture IMF failure")
         return [fixture_document(source)]
 
-    monkeypatch.setattr("app.cli.fetch_rss_documents", mixed_fetch)
+    monkeypatch.setattr("app.commands.ingest.fetch_rss_documents", mixed_fetch)
 
     result = runner.invoke(
         app,
