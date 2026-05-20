@@ -1,0 +1,8 @@
+* @vnss771-sudo
+
+/.github/ @vnss771-sudo
+/scripts/ @vnss771-sudo
+/app/ingestion/ @vnss771-sudo
+/app/scoring/ @vnss771-sudo
+/app/alerts/ @vnss771-sudo
+/config/ @vnss771-sudo

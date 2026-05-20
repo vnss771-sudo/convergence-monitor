@@ -7,3 +7,24 @@ htmlcov/
 dist/
 build/
 *.egg-info/
+
+# --- convergence-monitor generated/runtime artifacts ---
+data/raw/
+data/processed/
+data/runs/
+data/live_proof_sessions/
+LIVE_HISTORY_OUTPUT.json
+LIVE_PROOF_REPORT*.md
+convergence-monitor-live-proof-results*.zip
+SOURCE_MANIFEST.json
+*.sha256
+dist/
+build/
+*.egg-info/
+.coverage
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+__pycache__/
+# --- end convergence-monitor generated/runtime artifacts ---
+

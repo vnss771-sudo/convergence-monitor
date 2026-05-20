@@ -1,0 +1,84 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Tag or commit SHA to package"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Build release artifacts
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve ref
+        id: ref
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            printf 'value=%s\n' "${{ inputs.ref }}" >> "$GITHUB_OUTPUT"
+          else
+            printf 'value=%s\n' "${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip build
+          python -m pip install -e '.[dev]'
+
+      - name: Validate
+        run: |
+          python -m app.cli validate-config
+          python -m compileall -q app tests
+          pytest -q
+          ruff check .
+
+      - name: Build pinned source zip
+        run: |
+          bash scripts/release/make_zip_from_existing_repo.sh \
+            --repo-dir "$PWD" \
+            --ref "${{ steps.ref.outputs.value }}" \
+            --output "dist/convergence-monitor-source.zip" \
+            --allow-floating-ref
+
+      - name: Build Python package
+        run: python -m build
+
+      - name: Generate checksums
+        run: |
+          cd dist
+          sha256sum * > SHA256SUMS.txt
+
+      - name: Upload GitHub release artifacts
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/convergence-monitor-source.zip
+            dist/convergence-monitor-source.zip.sha256
+            dist/*.tar.gz
+            dist/*.whl
+            dist/SHA256SUMS.txt

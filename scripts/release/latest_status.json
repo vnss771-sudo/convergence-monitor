@@ -1,0 +1,9 @@
+{
+  "created_at_utc": "2026-05-20T07:34:48Z",
+  "repo": "https://github.com/vnss771-sudo/convergence-monitor",
+  "recommended_ref_policy": "Use a release tag or full commit SHA. Branch names require --allow-floating-ref.",
+  "replaces": [
+    "download_latest_source.sh",
+    "make_zip_from_existing_termux_repo.sh"
+  ]
+}
