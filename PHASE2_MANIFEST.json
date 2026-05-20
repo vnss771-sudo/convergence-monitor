@@ -1,0 +1,21 @@
+{
+  "name": "convergence-monitor-unicorn-phase2-kit",
+  "generated_for": "convergence-monitor",
+  "date": "2026-05-20",
+  "contents": [
+    "PR_COMMIT_SERIES.md",
+    "README.md",
+    "docs/CLI_SPLIT_MIGRATION.md",
+    "docs/OPERATIONS_RUNBOOK_PHASE2.md",
+    "docs/PACKAGE_RENAME_MIGRATION.md",
+    "docs/PHASE2_ARCHITECTURE.md",
+    "docs/SCORING_GOVERNANCE_PHASE2.md",
+    "scripts/install_phase2_tools.sh",
+    "tests/phase2/test_cli_contract_phase2.py",
+    "tests/phase2/test_repo_hygiene_phase2.py",
+    "tools/generate_operator_fixture.py",
+    "tools/rename_app_package.py",
+    "tools/split_cli_commands.py",
+    "tools/unicorn_repo_audit.py"
+  ]
+}
