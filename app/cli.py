@@ -18,7 +18,7 @@ from app.ingestion.failures import (
     load_source_health,
     update_source_health,
 )
-from app.ingestion.rss_base import IngestionError, fetch_rss_documents, save_documents_jsonl
+from app.ingestion.rss_base import EmptyFeedError, IngestionError, fetch_rss_documents, save_documents_jsonl
 from app.live_acceptance import evaluate_live_acceptance, load_live_verification_payload
 from app.live_verification import run_live_verification
 from app.live_review import build_and_write_live_review_pack
@@ -91,15 +91,27 @@ def _ingest_one_source(
     runs_dir: Path,
     config_dir: Path,
     replace: bool,
+    timeout_seconds: float = 20.0,
 ) -> dict[str, Any]:
     """Ingest one source and return a structured success or failure payload."""
 
-    parameters = {"source": source_config.id, "limit": limit, "replace": replace}
+    parameters = {
+        "source": source_config.id,
+        "limit": limit,
+        "replace": replace,
+        "timeout_seconds": timeout_seconds,
+    }
     inputs = {"source_url": str(source_config.url)}
     raw_path = _raw_path(raw_dir, source_config.id)
 
     try:
-        documents = fetch_rss_documents(source_config, limit=limit)
+        documents = fetch_rss_documents(
+            source_config,
+            limit=limit,
+            timeout_seconds=timeout_seconds,
+        )
+        fetched_entries = int(getattr(documents, "fetched_entries", len(documents)))
+        skipped_invalid_entries = int(getattr(documents, "skipped_invalid_entries", 0))
         save_result = save_documents_jsonl(
             documents,
             source_id=source_config.id,
@@ -120,6 +132,7 @@ def _ingest_one_source(
                 "fetched": 0,
                 "saved": 0,
                 "skipped_existing": 0,
+            "skipped_invalid_entries": 0,
                 "sources_attempted": 1,
                 "sources_succeeded": 0,
                 "sources_failed": 1,
@@ -143,7 +156,9 @@ def _ingest_one_source(
             "fetched": 0,
             "saved": 0,
             "skipped_existing": 0,
+            "skipped_invalid_entries": 0,
             "raw_path": raw_path,
+            "empty_feed": isinstance(exc, EmptyFeedError),
             "run_snapshot_path": str(run_path),
         }
     except Exception as exc:
@@ -164,6 +179,7 @@ def _ingest_one_source(
                 "fetched": 0,
                 "saved": 0,
                 "skipped_existing": 0,
+            "skipped_invalid_entries": 0,
                 "sources_attempted": 1,
                 "sources_succeeded": 0,
                 "sources_failed": 1,
@@ -187,6 +203,7 @@ def _ingest_one_source(
             "fetched": 0,
             "saved": 0,
             "skipped_existing": 0,
+            "skipped_invalid_entries": 0,
             "raw_path": raw_path,
             "run_snapshot_path": str(run_path),
         }
@@ -203,6 +220,8 @@ def _ingest_one_source(
             "fetched": save_result.fetched,
             "saved": save_result.saved,
             "skipped_existing": save_result.skipped_existing,
+            "fetched_entries": fetched_entries,
+            "skipped_invalid_entries": skipped_invalid_entries,
             "sources_attempted": 1,
             "sources_succeeded": 1,
             "sources_failed": 0,
@@ -217,6 +236,8 @@ def _ingest_one_source(
             "fetched": save_result.fetched,
             "saved": save_result.saved,
             "skipped_existing": save_result.skipped_existing,
+            "fetched_entries": fetched_entries,
+            "skipped_invalid_entries": skipped_invalid_entries,
         },
     )
 
@@ -228,6 +249,8 @@ def _ingest_one_source(
         "fetched": save_result.fetched,
         "saved": save_result.saved,
         "skipped_existing": save_result.skipped_existing,
+            "fetched_entries": fetched_entries,
+            "skipped_invalid_entries": skipped_invalid_entries,
         "raw_path": save_result.raw_path,
         "run_snapshot_path": str(run_path),
     }
@@ -237,6 +260,12 @@ def _ingest_one_source(
 def ingest(
     source: str = typer.Option(..., "--source", help="Source ID to ingest, or 'all'."),
     limit: int = typer.Option(10, "--limit", min=1, help="Maximum records to fetch."),
+    timeout_seconds: float = typer.Option(
+        20.0,
+        "--timeout-seconds",
+        min=1.0,
+        help="Per-source RSS fetch timeout in seconds.",
+    ),
     config_dir: Path = typer.Option(
         Path("config"),
         "--config-dir",
@@ -284,6 +313,7 @@ def ingest(
                 runs_dir=runs_dir,
                 config_dir=config_dir,
                 replace=replace,
+                timeout_seconds=timeout_seconds,
             )
             for source_config in bundle.enabled_sources
         ]
@@ -302,7 +332,12 @@ def ingest(
             operation="ingest",
             subject="all",
             status=status,
-            parameters={"source": "all", "limit": limit, "replace": replace},
+            parameters={
+            "source": "all",
+            "limit": limit,
+            "replace": replace,
+            "timeout_seconds": timeout_seconds,
+        },
             inputs={"source_ids": [item.id for item in bundle.enabled_sources]},
             outputs={
                 "raw_paths": [
@@ -317,6 +352,9 @@ def ingest(
                 "saved": sum(int(result.get("saved", 0)) for result in results),
                 "skipped_existing": sum(
                     int(result.get("skipped_existing", 0)) for result in results
+                ),
+                "skipped_invalid_entries": sum(
+                    int(result.get("skipped_invalid_entries", 0)) for result in results
                 ),
             },
             config_dir=config_dir,
@@ -340,6 +378,9 @@ def ingest(
             "skipped_existing": sum(
                 int(result.get("skipped_existing", 0)) for result in results
             ),
+            "skipped_invalid_entries": sum(
+                int(result.get("skipped_invalid_entries", 0)) for result in results
+            ),
             "results": results,
             "failures": failures,
             "run_snapshot_path": str(global_run_path),
@@ -362,13 +403,19 @@ def ingest(
             operation="ingest",
             subject=source,
             status="error",
-            parameters={"source": source, "limit": limit, "replace": replace},
+            parameters={
+            "source": source,
+            "limit": limit,
+            "replace": replace,
+            "timeout_seconds": timeout_seconds,
+        },
             inputs={},
             outputs={"raw_path": _raw_path(raw_dir, source)},
             counts={
                 "fetched": 0,
                 "saved": 0,
                 "skipped_existing": 0,
+            "skipped_invalid_entries": 0,
                 "sources_attempted": 1,
                 "sources_succeeded": 0,
                 "sources_failed": 1,
@@ -391,6 +438,7 @@ def ingest(
             "fetched": 0,
             "saved": 0,
             "skipped_existing": 0,
+            "skipped_invalid_entries": 0,
             "raw_path": _raw_path(raw_dir, source),
             "run_snapshot_path": str(run_path),
         }
@@ -409,13 +457,19 @@ def ingest(
             operation="ingest",
             subject=source,
             status="error",
-            parameters={"source": source, "limit": limit, "replace": replace},
+            parameters={
+            "source": source,
+            "limit": limit,
+            "replace": replace,
+            "timeout_seconds": timeout_seconds,
+        },
             inputs={"source_url": str(source_config.url)},
             outputs={"raw_path": raw_path},
             counts={
                 "fetched": 0,
                 "saved": 0,
                 "skipped_existing": 0,
+            "skipped_invalid_entries": 0,
                 "sources_attempted": 1,
                 "sources_succeeded": 0,
                 "sources_failed": 1,
@@ -438,6 +492,7 @@ def ingest(
             "fetched": 0,
             "saved": 0,
             "skipped_existing": 0,
+            "skipped_invalid_entries": 0,
             "raw_path": raw_path,
             "run_snapshot_path": str(run_path),
         }
@@ -451,6 +506,7 @@ def ingest(
         runs_dir=runs_dir,
         config_dir=config_dir,
         replace=replace,
+        timeout_seconds=timeout_seconds,
     )
     typer.echo(json.dumps(payload, indent=2))
     if payload["status"] == "error":

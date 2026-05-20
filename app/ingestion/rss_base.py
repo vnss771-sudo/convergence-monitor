@@ -17,6 +17,25 @@ class IngestionError(RuntimeError):
     """Raised when RSS ingestion cannot complete."""
 
 
+class EmptyFeedError(IngestionError):
+    """Raised when a source fetch succeeds but no RSS entries are available."""
+
+
+class FetchedDocuments(list[DocumentRecord]):
+    """List-compatible document batch with ingestion diagnostics."""
+
+    def __init__(
+        self,
+        documents: list[DocumentRecord],
+        *,
+        fetched_entries: int,
+        skipped_invalid_entries: int,
+    ) -> None:
+        super().__init__(documents)
+        self.fetched_entries = fetched_entries
+        self.skipped_invalid_entries = skipped_invalid_entries
+
+
 def utc_now_iso() -> str:
     return datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
@@ -253,23 +272,37 @@ def parse_rss_payload_stdlib(payload: bytes, source_id: str) -> list[dict[str, A
     return entries
 
 
-def fetch_rss_documents(source: Source, limit: int = 10) -> list[DocumentRecord]:
+def fetch_rss_documents(
+    source: Source,
+    limit: int = 10,
+    timeout_seconds: float | None = None,
+) -> FetchedDocuments:
     if limit < 1:
         raise ValueError("limit must be at least 1")
 
-    payload = fetch_rss_payload(source)
+    timeout = timeout_seconds if timeout_seconds is not None else source.timeout_seconds
+    payload = fetch_rss_payload(source, timeout_seconds=timeout)
     entries = parse_rss_payload(payload, source.id)[:limit]
-    ingested_at = utc_now_iso()
 
+    if not entries:
+        raise EmptyFeedError(f"RSS source '{source.id}' returned no feed entries.")
+
+    ingested_at = utc_now_iso()
     documents: list[DocumentRecord] = []
+    skipped_invalid_entries = 0
+
     for entry in entries:
         try:
             documents.append(normalize_entry(entry, source, ingested_at))
         except IngestionError:
-            # Skip unusable entries but keep the command deterministic for usable records.
+            skipped_invalid_entries += 1
             continue
 
-    return documents
+    return FetchedDocuments(
+        documents,
+        fetched_entries=len(entries),
+        skipped_invalid_entries=skipped_invalid_entries,
+    )
 
 
 def read_documents_jsonl(path: Path) -> list[DocumentRecord]:
