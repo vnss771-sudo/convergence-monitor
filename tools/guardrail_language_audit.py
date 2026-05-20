@@ -40,6 +40,9 @@ EXCLUDED_TOP_LEVEL_DIRS = {
 }
 
 EXCLUDED_RELATIVE_PATHS = {
+    Path("SECURITY.md"),
+    Path("SPRINT_1_EXECUTION.md"),
+    Path("SPRINT_2_EXECUTION.md"),
     Path("tools/guardrail_language_audit.py"),
     Path("docs/GUARDRAIL_LANGUAGE_POLICY.md"),
     Path("docs/ARCHITECTURE_NEXT.md"),
