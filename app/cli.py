@@ -16,6 +16,7 @@ from app.classification.keyword_matcher import (
 from app.ingestion.failures import (
     ingestion_error_payload,
     load_source_health,
+    summarize_source_health_payload,
     update_source_health,
 )
 from app.ingestion.rss_base import EmptyFeedError, IngestionError, fetch_rss_documents, save_documents_jsonl
@@ -1152,7 +1153,8 @@ def source_health(
 ) -> None:
     """Return latest source-health status as stable JSON."""
     payload = load_source_health(runs_dir)
-    typer.echo(json.dumps({"status": "ok", **payload}, indent=2))
+    summary = summarize_source_health_payload(payload)
+    typer.echo(json.dumps({"status": "ok", **payload, "summary": summary}, indent=2))
 
 
 if __name__ == "__main__":

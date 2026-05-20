@@ -101,3 +101,66 @@ def update_source_health(
         encoding="utf-8",
     )
     return path
+
+
+def summarize_source_health_payload(
+    payload: dict[str, Any],
+    *,
+    expected_source_ids: list[str] | None = None,
+) -> dict[str, Any]:
+    """Summarize source health without hiding failing source details."""
+    sources = payload.get("sources", {})
+    expected_ids = expected_source_ids or sorted(sources)
+
+    sources_ok = 0
+    sources_error = 0
+    sources_unknown = 0
+    failed_sources: list[dict[str, Any]] = []
+    failure_types: dict[str, int] = {}
+
+    for source_id in expected_ids:
+        record = sources.get(source_id)
+        status = record.get("status") if isinstance(record, dict) else None
+
+        if status == "ok":
+            sources_ok += 1
+            continue
+
+        if status is None:
+            sources_unknown += 1
+            continue
+
+        sources_error += 1
+        error = record.get("error") or {}
+        error_type = str(error.get("type") or "unknown_error")
+        failure_types[error_type] = failure_types.get(error_type, 0) + 1
+        failed_sources.append(
+            {
+                "source_id": source_id,
+                "status": status,
+                "error_type": error_type,
+                "message": str(error.get("message") or ""),
+                "last_checked_at": record.get("last_checked_at"),
+                "last_success_at": record.get("last_success_at"),
+                "last_failure_at": record.get("last_failure_at"),
+            }
+        )
+
+    if not expected_ids:
+        overall = "unavailable"
+    elif sources_error:
+        overall = "degraded" if sources_ok or sources_unknown else "error"
+    elif sources_unknown:
+        overall = "unknown"
+    else:
+        overall = "ok"
+
+    return {
+        "sources_total": len(expected_ids),
+        "sources_ok": sources_ok,
+        "sources_error": sources_error,
+        "sources_unknown": sources_unknown,
+        "overall": overall,
+        "failure_types": failure_types,
+        "failed_sources": failed_sources,
+    }
