@@ -64,6 +64,7 @@ class Source(BaseModel):
     enabled: bool = True
     trust_weight: float = Field(gt=0, le=1)
     url: HttpUrl
+    fallback_urls: list[HttpUrl] = Field(default_factory=list)
     timeout_seconds: float = Field(default=20.0, gt=0, le=120)
 
 

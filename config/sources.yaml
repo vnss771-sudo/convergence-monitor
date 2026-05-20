@@ -7,6 +7,8 @@ sources:
   trust_weight: 1.0
   url: https://www.bis.org/doclist/rss_all_categories.rss
   timeout_seconds: 20.0
+  fallback_urls:
+  - https://www.bis.org/rss/bispublications.xml
 - id: imf
   name: International Monetary Fund
   category: international_finance
@@ -15,6 +17,8 @@ sources:
   trust_weight: 0.9
   url: https://www.imf.org/en/News/RSS
   timeout_seconds: 20.0
+  fallback_urls:
+  - https://www.imf.org/en/News/RSS/Press-Releases
 - id: rba
   name: Reserve Bank of Australia
   category: national_central_bank
@@ -23,6 +27,9 @@ sources:
   trust_weight: 0.85
   url: https://www.rba.gov.au/rss/rss-cb-media-releases.xml
   timeout_seconds: 20.0
+  fallback_urls:
+  - https://www.rba.gov.au/rss/rss-cb-speeches.xml
+  - https://www.rba.gov.au/rss/rss-cb-bulletin.xml
 - id: federal_reserve
   name: Federal Reserve
   category: national_central_bank
@@ -31,6 +38,7 @@ sources:
   trust_weight: 0.85
   url: https://www.federalreserve.gov/feeds/press_all.xml
   timeout_seconds: 20.0
+  fallback_urls: []
 - id: ecb
   name: European Central Bank
   category: national_central_bank
@@ -39,3 +47,5 @@ sources:
   trust_weight: 0.85
   url: https://www.ecb.europa.eu/rss/press.html
   timeout_seconds: 20.0
+  fallback_urls:
+  - https://www.ecb.europa.eu/rss/press.html
