@@ -200,3 +200,59 @@ def test_load_raw_and_save_classified_documents_jsonl(tmp_path: Path) -> None:
     }
     assert payload["scenario_id"] == "cbdc_payment_resilience"
     assert payload["relevance"] == "central"
+
+
+def test_classifier_ignores_negated_primary_terms() -> None:
+    document = make_document(
+        title="Clarification note",
+        summary=(
+            "This is not a CBDC initiative. It is unrelated to cross-border payments "
+            "and does not concern settlement infrastructure or programmable money."
+        ),
+    )
+
+    classified = classify_document(
+        document,
+        scenario(),
+        classified_at="2026-05-19T02:00:00Z",
+    )
+
+    assert classified.relevance == "irrelevant"
+    assert classified.matched_primary_terms == []
+    assert classified.total_match_count == 0
+
+
+def test_classifier_excludes_search_or_tag_pages() -> None:
+    document = make_document(
+        title="Search results for CBDC settlement infrastructure",
+        summary=(
+            "This search page lists CBDC, cross-border payments, settlement "
+            "infrastructure, and programmable money results."
+        ),
+        document_id="search?q=cbdc",
+    )
+
+    classified = classify_document(
+        document,
+        scenario(),
+        classified_at="2026-05-19T02:00:00Z",
+    )
+
+    assert classified.relevance == "excluded"
+    assert "search-results page" in classified.reason
+
+
+def test_classifier_prevents_title_only_central_false_positive() -> None:
+    document = make_document(
+        title="CBDC cross-border payments settlement infrastructure programmable money",
+        summary="Index page.",
+    )
+
+    classified = classify_document(
+        document,
+        scenario(),
+        classified_at="2026-05-19T02:00:00Z",
+    )
+
+    assert classified.relevance == "incidental"
+    assert "lacks a substantive summary" in classified.reason
