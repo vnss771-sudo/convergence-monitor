@@ -1,0 +1,51 @@
+name: release-provenance
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+
+jobs:
+  build-release-artifacts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install build backend
+        run: python -m pip install --upgrade build
+
+      - name: Build package and metadata
+        run: bash scripts/build_phase3_release.sh --repo-dir "$PWD"
+
+      - name: Generate GitHub build provenance attestations
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            dist/*.tar.gz
+            dist/*.whl
+            dist/*.json
+            dist/*.sha256
+
+      - name: Upload release evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: convergence-monitor-release-evidence
+          path: |
+            dist/*.tar.gz
+            dist/*.whl
+            dist/*.json
+            dist/*.sha256
+          if-no-files-found: error
