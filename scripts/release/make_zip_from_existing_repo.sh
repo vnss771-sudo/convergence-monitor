@@ -251,6 +251,9 @@ write_manifest "$export_dir" "$repo_url" "$ref" "$actual_commit"
 mkdir -p "$(dirname "$output_path")"
 rm -f "$output_path"
 
+mkdir -p "$(dirname "$output_path")"
+output_path="$(cd "$(dirname "$output_path")" && pwd -P)/$(basename "$output_path")"
+
 (
   cd "$export_dir"
   zip -qr "$output_path" .
