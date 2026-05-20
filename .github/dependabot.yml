@@ -1,0 +1,27 @@
+version: 2
+
+updates:
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    groups:
+      python-runtime:
+        patterns:
+          - "typer"
+          - "pydantic"
+          - "pyyaml"
+          - "feedparser"
+          - "httpx"
+          - "python-dateutil"
+      python-dev:
+        patterns:
+          - "pytest"
+          - "ruff"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5

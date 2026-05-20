@@ -1,0 +1,57 @@
+name: Nightly live verification
+
+on:
+  schedule:
+    - cron: "41 16 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: nightly-live-verification
+  cancel-in-progress: false
+
+jobs:
+  verify-live:
+    name: Verify configured live sources
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    continue-on-error: true
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev]'
+
+      - name: Run live verification
+        run: |
+          python -m app.cli verify-live --scenario cbdc_payment_resilience --window 30d
+
+      - name: Summarise live history
+        if: always()
+        run: |
+          python -m app.cli live-history --scenario cbdc_payment_resilience > LIVE_HISTORY_OUTPUT.json || true
+
+      - name: Upload runtime artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-verification-${{ github.run_id }}
+          path: |
+            data/runs/live_verifications/**
+            data/runs/live_review_packs/**
+            LIVE_HISTORY_OUTPUT.json
+          if-no-files-found: ignore
+          retention-days: 14

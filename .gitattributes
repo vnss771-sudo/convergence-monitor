@@ -1,0 +1,36 @@
+# Release hygiene: keep source archives clean.
+.github/ export-ignore
+data/raw/** export-ignore
+data/processed/** export-ignore
+data/runs/** export-ignore
+data/live_proof_sessions/** export-ignore
+*.zip export-ignore
+*.tar.gz export-ignore
+*.whl export-ignore
+LIVE_HISTORY_OUTPUT.json export-ignore
+LIVE_PROOF_REPORT*.md export-ignore
+SOURCE_MANIFEST.json export-ignore
+*.sha256 export-ignore
+.coverage export-ignore
+.pytest_cache/** export-ignore
+.ruff_cache/** export-ignore
+.mypy_cache/** export-ignore
+__pycache__/** export-ignore
+
+# Normalise text files.
+*.py text eol=lf
+*.sh text eol=lf
+*.md text eol=lf
+*.toml text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.json text eol=lf
+*.jsonl text eol=lf
+
+# Binary artifacts.
+*.zip binary
+*.gz binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.pdf binary
