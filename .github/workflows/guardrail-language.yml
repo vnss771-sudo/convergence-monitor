@@ -1,0 +1,29 @@
+name: guardrail-language
+
+on:
+  pull_request:
+    paths:
+      - "**/*.py"
+      - "**/*.md"
+      - "**/*.toml"
+      - "**/*.yaml"
+      - "**/*.yml"
+      - "**/*.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  guardrail-language:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Audit non-speculative language
+        run: python tools/guardrail_language_audit.py --root "$PWD" --format markdown --fail-on error

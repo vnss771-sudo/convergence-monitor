@@ -20,7 +20,7 @@ python -m app.cli live-history --scenario cbdc_payment_resilience
 
 ## Expected degradation model
 
-Single-source failures should be visible and structured. Multi-source failures may produce degraded status. Degraded source availability is an operations signal, not a convergence signal by itself.
+Single-source failures should be visible and structured. Multi-source failures may produce degraded status. Degraded source availability is an operations health indicator, not evidence of convergence by itself.
 
 ## Evidence review
 

@@ -1,12 +1,12 @@
 # Convergence Monitor
 
-Public-document convergence monitor for institutional macro-risk scenarios.
+Public-document convergence monitor for institutional macro-condition scenarios.
 
 Sprint 1 focuses on a command-line JSON alert engine for one scenario:
 
 `cbdc_payment_resilience`
 
-The system does **not** infer intent, coordination, causation, or inevitability. It reports observable public-document convergence only.
+This project reports observable public-document convergence from public records.
 
 ## Current status
 
@@ -179,7 +179,7 @@ Expected output shape:
   "limitations": [
     "Baseline model is provisional.",
     "Scoring is deterministic and rule-based.",
-    "This does not infer intent, coordination, or future events."
+This project reports observable public-document convergence from public records.
   ]
 }
 ```
@@ -207,7 +207,7 @@ Scoring rules:
 
 ## Sprint guardrail
 
-No dashboard, no extra scenarios, no market prediction, no final alert card before PR 5, and no hidden-intent language during Sprint 1.
+No dashboard, no extra scenarios, no market convergence assessment, no final alert card before PR 5, and no hidden-intent language during Sprint 1.
 
 
 ## PR 5 acceptance
@@ -316,7 +316,7 @@ Latest source health can be inspected with:
 python -m app.cli runs health
 ```
 
-PR 7 does not add scenarios, dashboards, predictions, or narrative analysis.
+PR 7 does not add scenarios, dashboards, convergence assessments, or narrative analysis.
 
 ## Full local verification
 
@@ -351,7 +351,7 @@ Still not included:
 
 - dashboard
 - new scenarios
-- market prediction
+- market convergence assessment
 - scoring redesign
 - speculative narrative interpretation
 
@@ -378,4 +378,4 @@ recent `verify-live` results, acceptance decisions, review-pack coverage, the
 latest live state, and warnings for rejected or unreviewed usable runs.
 
 It does not fetch sources, generate scores, generate alerts, update baselines,
-add scenarios, dashboards, predictions, or narrative interpretation.
+add scenarios, dashboards, convergence assessments, or narrative interpretation.

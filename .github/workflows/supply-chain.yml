@@ -1,0 +1,48 @@
+name: supply-chain
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  policy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Guardrail language audit
+        run: python tools/guardrail_language_audit.py --root "$PWD" --format markdown --fail-on error
+
+      - name: Dependency policy audit
+        run: python tools/dependency_policy_audit.py --root "$PWD" --format markdown --fail-on high
+
+  sbom:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: policy
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Generate minimal SBOM
+        run: python tools/generate_minimal_sbom.py --root "$PWD" --output dist/convergence-monitor.sbom.cdx.json --include-dev
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: convergence-monitor-sbom
+          path: dist/convergence-monitor.sbom.cdx.json
+          if-no-files-found: error

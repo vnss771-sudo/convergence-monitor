@@ -9,9 +9,9 @@ What changed?
 - [ ] `pytest -q`
 - [ ] `ruff check .`
 
-## Risk check
+## Condition check
 
-- [ ] Does not infer intent, coordination, causation, or inevitability.
+- [ ] Uses observable public-document convergence language.
 - [ ] Does not add generated runtime artifacts to git.
 - [ ] Does not change scoring semantics without tests.
 - [ ] Does not add network-dependent tests to the default suite.
