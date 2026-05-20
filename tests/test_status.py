@@ -214,6 +214,8 @@ def test_status_cli_reports_missing_artifacts_without_failing(tmp_path: Path) ->
         "sources_error": 0,
         "sources_unknown": 5,
         "overall": "unknown",
+        "failure_types": {},
+        "failed_sources": [],
     }
     assert payload["latest_runs"] == {
         "ingest": "missing",
