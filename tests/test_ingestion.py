@@ -12,6 +12,7 @@ from app.ingestion.rss_base import (
     make_document_id,
     normalize_entry,
     save_documents_jsonl,
+    source_candidate_urls,
 )
 from app.models import Source
 
@@ -189,3 +190,69 @@ def test_fetch_rss_documents_raises_empty_feed(monkeypatch) -> None:
 
     with pytest.raises(EmptyFeedError, match="returned no feed entries"):
         fetch_rss_documents(source, limit=10)
+
+
+def test_source_candidate_urls_includes_primary_then_fallbacks() -> None:
+    source = Source(
+        id="bis",
+        name="Bank for International Settlements",
+        category="central_bank_coordination",
+        type="rss",
+        enabled=True,
+        trust_weight=1.0,
+        url="https://example.com/primary.xml",
+        fallback_urls=[
+            "https://example.com/fallback-1.xml",
+            "https://example.com/fallback-2.xml",
+        ],
+    )
+
+    assert source_candidate_urls(source) == [
+        "https://example.com/primary.xml",
+        "https://example.com/fallback-1.xml",
+        "https://example.com/fallback-2.xml",
+    ]
+
+
+def test_fetch_rss_payload_uses_fallback_url(monkeypatch) -> None:
+    source = Source(
+        id="bis",
+        name="Bank for International Settlements",
+        category="central_bank_coordination",
+        type="rss",
+        enabled=True,
+        trust_weight=1.0,
+        url="https://example.com/primary.xml",
+        fallback_urls=["https://example.com/fallback.xml"],
+    )
+
+    calls: list[str] = []
+
+    class FakeResponse:
+        def __init__(self, url: str) -> None:
+            self.url = url
+            self.content = b"<rss><channel></channel></rss>"
+
+        def raise_for_status(self) -> None:
+            if self.url.endswith("primary.xml"):
+                import httpx
+
+                raise httpx.HTTPStatusError(
+                    "primary failed",
+                    request=httpx.Request("GET", self.url),
+                    response=httpx.Response(500),
+                )
+
+    def fake_get(url: str, timeout: float, follow_redirects: bool):
+        calls.append(url)
+        return FakeResponse(url)
+
+    monkeypatch.setattr("httpx.get", fake_get)
+
+    from app.ingestion.rss_base import fetch_rss_payload
+
+    assert fetch_rss_payload(source, timeout_seconds=3.0) == b"<rss><channel></channel></rss>"
+    assert calls == [
+        "https://example.com/primary.xml",
+        "https://example.com/fallback.xml",
+    ]

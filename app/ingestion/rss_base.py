@@ -49,6 +49,12 @@ def normalize_whitespace(value: str | None) -> str:
     return cleaned.strip()
 
 
+def source_candidate_urls(source: Source) -> list[str]:
+    urls = [str(source.url)]
+    urls.extend(str(url) for url in source.fallback_urls)
+    return urls
+
+
 def parse_datetime(value: Any) -> str | None:
     """Parse RSS date strings into stable UTC ISO-8601 strings."""
     if not value:
@@ -178,16 +184,25 @@ def fetch_rss_payload(source: Source, timeout_seconds: float = 20.0) -> bytes:
             "Missing dependency 'httpx'. Install project dependencies with: pip install -e ."
         ) from exc
 
-    try:
-        response = httpx.get(str(source.url), timeout=timeout_seconds, follow_redirects=True)
-        response.raise_for_status()
-    except httpx.HTTPError as exc:
-        raise IngestionError(f"Failed to fetch RSS source '{source.id}': {exc}") from exc
+    errors: list[str] = []
 
-    if not response.content:
-        raise IngestionError(f"RSS source '{source.id}' returned an empty response.")
+    for url in source_candidate_urls(source):
+        try:
+            response = httpx.get(url, timeout=timeout_seconds, follow_redirects=True)
+            response.raise_for_status()
+        except httpx.HTTPError as exc:
+            errors.append(f"{url}: {exc}")
+            continue
 
-    return response.content
+        if response.content:
+            return response.content
+
+        errors.append(f"{url}: empty response")
+
+    raise IngestionError(
+        f"Failed to fetch RSS source '{source.id}' from all configured URLs: "
+        + " | ".join(errors)
+    )
 
 
 def parse_rss_payload(payload: bytes, source_id: str) -> list[dict[str, Any]]:
