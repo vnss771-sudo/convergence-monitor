@@ -41,7 +41,7 @@ jobs:
         run: python tools/generate_minimal_sbom.py --root "$PWD" --output dist/convergence-monitor.sbom.cdx.json --include-dev
 
       - name: Upload SBOM
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: convergence-monitor-sbom
           path: dist/convergence-monitor.sbom.cdx.json
