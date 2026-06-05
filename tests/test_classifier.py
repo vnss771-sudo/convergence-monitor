@@ -88,10 +88,9 @@ def test_classifier_marks_central_document() -> None:
         "cbdc",
         "central bank digital currency",
         "cross-border payments",
-        "financial market infrastructure",
         "settlement infrastructure",
     ]
-    assert classified.matched_secondary_terms == []
+    assert classified.matched_secondary_terms == ["financial market infrastructure"]
     assert classified.matched_exclusion_terms == []
     assert "central to the document" in classified.reason
 

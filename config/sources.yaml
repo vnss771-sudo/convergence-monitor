@@ -48,4 +48,4 @@ sources:
   url: https://www.ecb.europa.eu/rss/press.html
   timeout_seconds: 20.0
   fallback_urls:
-  - https://www.ecb.europa.eu/rss/press.html
+  - https://www.ecb.europa.eu/rss/speeches.html

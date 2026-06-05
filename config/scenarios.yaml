@@ -15,17 +15,21 @@ scenarios:
       - digital settlement
       - programmable money
       - tokenised deposits
-      - financial market infrastructure
+      - tokenized deposits
+      - mbridge
+      - digital euro
     secondary_terms:
       - wholesale cbdc
       - retail cbdc
       - instant payments
       - iso 20022
       - tokenisation
+      - tokenization
       - central bank money
       - payment rails
       - correspondent banking
       - liquidity bridge
+      - financial market infrastructure
     exclusion_terms:
       - cryptocurrency price
       - bitcoin trading
