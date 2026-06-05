@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from dateutil import parser as date_parser
+from pydantic import ValidationError
 
 from app.models import DocumentRecord, IngestionSaveResult, Source
 
@@ -332,7 +333,7 @@ def read_documents_jsonl(path: Path) -> list[DocumentRecord]:
                 continue
             try:
                 records.append(DocumentRecord.model_validate_json(stripped))
-            except Exception as exc:
+            except (IngestionError, ValidationError, json.JSONDecodeError, ValueError) as exc:
                 message = f"Invalid raw JSONL record in {path}:{line_number}: {exc}"
                 raise IngestionError(message) from exc
     return records

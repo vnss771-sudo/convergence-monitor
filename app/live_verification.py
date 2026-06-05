@@ -326,7 +326,7 @@ def run_live_verification(
         score_record.baseline_comparison = compare_score_to_baseline(
             score=score_record,
             baselines_dir=baselines_dir,
-        ).model_dump(mode="json")
+        )
         score_path = str(save_score_json(score_record, processed_dir=processed_dir))
         confidence = score_record.confidence
         score_generated = True
