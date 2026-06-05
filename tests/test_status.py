@@ -79,7 +79,7 @@ def test_status_cli_reports_complete_scenario_state(tmp_path: Path) -> None:
     score.baseline_comparison = compare_score_to_baseline(
         score=score,
         baselines_dir=baselines_dir,
-    ).model_dump(mode="json")
+    )
     save_score_json(score, processed_dir=processed_dir)
 
     alert = build_alert_record(

@@ -92,7 +92,7 @@ def score(
         score_record.baseline_comparison = compare_score_to_baseline(
             score=score_record,
             baselines_dir=baselines_dir,
-        ).model_dump(mode="json")
+        )
         score_path = save_score_json(score_record, processed_dir=processed_dir)
 
         if update_baseline:

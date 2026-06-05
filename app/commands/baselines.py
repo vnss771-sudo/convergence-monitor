@@ -113,7 +113,7 @@ def update_baseline(
         score_record.baseline_comparison = compare_score_to_baseline(
             score=score_record,
             baselines_dir=baselines_dir,
-        ).model_dump(mode="json")
+        )
         store, record, created, baseline_file = add_baseline_observation(
             score=score_record,
             baselines_dir=baselines_dir,

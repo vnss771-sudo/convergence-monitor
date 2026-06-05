@@ -274,7 +274,7 @@ def score_documents(
         baseline_comparison=missing_baseline_comparison(
             scenario_id=scenario_id,
             current_score=convergence_score,
-        ).model_dump(mode="json"),
+        ),
         limitations=LIMITATIONS.copy(),
     )
 

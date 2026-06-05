@@ -173,6 +173,38 @@ class ScoreComponents(BaseModel):
     duplication_penalty: float = Field(ge=0, le=2)
 
 
+BASELINE_LIMITATIONS: list[str] = [
+    "Baseline comparison is descriptive only.",
+    "It does not change the deterministic convergence score.",
+    "It does not infer causation, intent, coordination, or future events.",
+]
+
+
+class BaselineComparison(BaseModel):
+    """Conservative comparison of a current score against stored history.
+
+    Descriptive only — never changes the deterministic convergence score and never
+    infers causation, intent, coordination, or future events.
+    """
+
+    status: Literal["baseline_unavailable", "baseline_available"]
+    scenario_id: str = Field(min_length=1)
+    current_score: float = Field(ge=0, le=10)
+    baseline_observation_count: int = Field(ge=0)
+    baseline_average_score: float | None = None
+    baseline_latest_score: float | None = None
+    baseline_min_score: float | None = None
+    baseline_max_score: float | None = None
+    delta_vs_baseline_average: float | None = None
+    comparison: Literal[
+        "not_enough_history",
+        "near_baseline",
+        "above_baseline",
+        "below_baseline",
+    ] = "not_enough_history"
+    limitations: list[str] = Field(default_factory=lambda: BASELINE_LIMITATIONS.copy())
+
+
 class ScenarioScoreRecord(BaseModel):
     """Scenario-level scoring output produced by PR 4.
 
@@ -194,7 +226,7 @@ class ScenarioScoreRecord(BaseModel):
     convergence_score: float = Field(ge=0, le=10)
     confidence: Literal["low", "medium", "high"]
     score_components: ScoreComponents
-    baseline_comparison: dict[str, Any] = Field(default_factory=dict)
+    baseline_comparison: BaselineComparison
     limitations: list[str] = Field(min_length=1)
 
 

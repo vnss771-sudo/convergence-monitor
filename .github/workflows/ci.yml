@@ -36,7 +36,7 @@ jobs:
         run: python -m pytest -q
 
       - name: Coverage
-        run: python -m pytest --cov=app --cov-report=term-missing -q
+        run: python -m pytest --cov=app --cov-report=term-missing --cov-fail-under=80 -q
 
       - name: Compile
         run: python -m compileall -q app tests
