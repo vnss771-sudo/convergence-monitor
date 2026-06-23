@@ -187,11 +187,13 @@ class ScoreComponents(BaseModel):
     """
 
     # Ceilings are the historical basis (3/2/2/1/2) scaled by 10/8 onto the 0–10
-    # convergence range; see app/scoring/convergence.py:SCORE_SCALE.
-    central_document_score: float = Field(ge=0, le=3.75)
+    # convergence range (see app/scoring/convergence.py:SCORE_SCALE), expressed as
+    # their one-decimal display maxima so a rounded component never trips the bound
+    # (e.g. 3.0*1.25 = 3.75 displays as 3.8).
+    central_document_score: float = Field(ge=0, le=3.8)
     source_diversity_score: float = Field(ge=0, le=2.5)
     trust_weight_score: float = Field(ge=0, le=2.5)
-    recency_score: float = Field(ge=0, le=1.25)
+    recency_score: float = Field(ge=0, le=1.3)
     duplication_penalty: float = Field(ge=0, le=2.5)
 
 
