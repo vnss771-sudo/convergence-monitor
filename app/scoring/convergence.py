@@ -5,7 +5,6 @@ It does not generate alerts, predictions, or narrative interpretations.
 """
 from __future__ import annotations
 
-import json
 import re
 from collections.abc import Iterable
 from datetime import datetime, timedelta
@@ -20,6 +19,7 @@ from app.models import (
     ScenarioScoreRecord,
     ScoreComponents,
 )
+from app.persistence import write_json_atomic
 from app.scoring.baselines import missing_baseline_comparison
 
 
@@ -28,6 +28,14 @@ LIMITATIONS = [
     "Scoring is deterministic and rule-based.",
     "This does not infer intent, coordination, or future events.",
 ]
+
+# The component formulas historically produced a basis that summed to a maximum of
+# 8.0 (central 3.0 + diversity 2.0 + trust 2.0 + recency 1.0), which left the top of
+# the documented 0–10 range — including most of the "high" band — unreachable. A
+# single uniform scale factor maps that basis onto the full 0–10 range while
+# preserving the relative weighting of every component and the duplication penalty.
+# 10 / 8 = 1.25. See docs/SCORING_GOVERNANCE.md for the before/after rationale.
+SCORE_SCALE = 10.0 / 8.0
 
 
 def clamp_score(value: float, minimum: float = 0.0, maximum: float = 10.0) -> float:
@@ -56,10 +64,22 @@ def parse_document_datetime(value: str | None) -> datetime | None:
     return parsed
 
 
-def confidence_for_score(score: float) -> str:
-    if score >= 7.0:
+def confidence_for_evidence(
+    *,
+    unique_contributor_count: int,
+    active_source_categories: int,
+) -> str:
+    """Confidence in the score, derived from how much evidence supports it.
+
+    Confidence is deliberately independent of the score's magnitude. It measures
+    evidence sufficiency: how many distinct (deduplicated) documents contribute and
+    how many institution categories agree. A high score from a single document is
+    low confidence; a moderate score corroborated across many sources is not.
+    """
+
+    if unique_contributor_count >= 6 and active_source_categories >= 3:
         return "high"
-    if score >= 3.0:
+    if unique_contributor_count >= 3 and active_source_categories >= 2:
         return "medium"
     return "low"
 
@@ -211,35 +231,42 @@ def score_documents(
     active_source_categories = len({doc.source_category for doc in unique_contributors})
     active_source_ids = {doc.source_id for doc in unique_contributors}
 
-    central_document_score = min(
+    # Component basis values (max sum 8.0); each is scaled onto the 0–10 range below.
+    central_basis = min(
         3.0,
         unique_central_count * 0.75 + unique_incidental_count * 0.15,
     )
 
     if active_source_categories == 0:
-        source_diversity_score = 0.0
+        diversity_basis = 0.0
     elif active_source_categories == 1:
-        source_diversity_score = 0.75
+        diversity_basis = 0.75
     elif active_source_categories == 2:
-        source_diversity_score = 1.50
+        diversity_basis = 1.50
     else:
-        source_diversity_score = 2.00
+        diversity_basis = 2.00
 
-    trust_weight_score = min(
+    trust_basis = min(
         2.0,
         sum(source_weights.get(source_id, 0.0) for source_id in active_source_ids) * 0.5,
     )
 
     as_of = _as_of_datetime(window_documents)
     if unique_contributors:
-        recency_score = sum(
+        recency_basis = sum(
             _recency_credit(document, as_of=as_of) for document in unique_contributors
         ) / len(unique_contributors)
     else:
-        recency_score = 0.0
+        recency_basis = 0.0
 
     duplicate_count = max(0, len(contributing_documents) - len(unique_contributors))
-    duplication_penalty = min(2.0, duplicate_count * 0.5)
+    penalty_basis = min(2.0, duplicate_count * 0.5)
+
+    central_document_score = central_basis * SCORE_SCALE
+    source_diversity_score = diversity_basis * SCORE_SCALE
+    trust_weight_score = trust_basis * SCORE_SCALE
+    recency_score = recency_basis * SCORE_SCALE
+    duplication_penalty = penalty_basis * SCORE_SCALE
 
     raw_score = (
         central_document_score
@@ -269,7 +296,10 @@ def score_documents(
         irrelevant_documents=len(irrelevant_documents),
         active_source_categories=active_source_categories,
         convergence_score=convergence_score,
-        confidence=confidence_for_score(convergence_score),
+        confidence=confidence_for_evidence(
+            unique_contributor_count=len(unique_contributors),
+            active_source_categories=active_source_categories,
+        ),
         score_components=components,
         baseline_comparison=missing_baseline_comparison(
             scenario_id=scenario_id,
@@ -284,19 +314,6 @@ def save_score_json(
     *,
     processed_dir: Path | str = Path("data/processed"),
 ) -> Path:
-    output_dir = Path(processed_dir)
-    output_dir.mkdir(parents=True, exist_ok=True)
-    output_path = output_dir / f"{score.scenario_id}_score.json"
-
-    output_path.write_text(
-        json.dumps(
-            score.model_dump(mode="json"),
-            indent=2,
-            sort_keys=True,
-            ensure_ascii=False,
-        )
-        + "\n",
-        encoding="utf-8",
-    )
-
+    output_path = Path(processed_dir) / f"{score.scenario_id}_score.json"
+    write_json_atomic(output_path, score.model_dump(mode="json"))
     return output_path

@@ -1,10 +1,38 @@
 # Convergence Monitor
 
-Public-document convergence monitor for institutional macro-condition scenarios.
+**Convergence Monitor watches what the world's financial institutions publicly
+say, and tells you — with a transparent, auditable score — when their published
+activity is converging around a specific macro scenario.**
 
-Sprint 1 focuses on a command-line JSON alert engine for one scenario:
+It continuously ingests public documents from authoritative institutions (the
+Bank for International Settlements, IMF, ECB, the U.S. Federal Reserve, the
+Reserve Bank of Australia) and, for a defined scenario, measures how much of that
+public activity is lining up. You get:
 
-`cbdc_payment_resilience`
+- a deterministic **0–10 convergence score**,
+- an **evidence-based confidence** rating (how much corroborating evidence backs
+  the score, independent of its magnitude), and
+- a **ranked trail of the exact public documents** behind every result.
+
+What sets it apart is its restraint. It reports only what public documents
+observably show — it does not claim to read institutional intent, anticipate
+events, or assert coordination. Every number is deterministic and reproducible —
+the same inputs always produce the same score, and each point traces back to
+specific public records. It is a signal you can defend in front of a skeptic, a
+regulator, or a risk committee.
+
+**Who it's for:** macro research desks, central-bank and policy analysts, risk
+teams, and journalists who need an early, *defensible* read on institutional
+alignment — without the overclaiming of typical trend or sentiment tools.
+
+**Where it is today (honest scope):** a working, well-tested command-line engine
+for a single scenario — `cbdc_payment_resilience` (cross-border CBDC and
+payment-system resilience). It produces JSON artifacts: ingested documents,
+classifications, scores, and alert cards. It does **not yet** ship a dashboard,
+alert delivery (email/Telegram), market-price feeds, or multiple scenarios. The
+roadmap toward those is in [`docs/reports/UNICORN_BUILD_PLAN.md`](docs/reports/UNICORN_BUILD_PLAN.md).
+
+---
 
 This project reports observable public-document convergence from public records.
 
@@ -167,13 +195,13 @@ Expected output shape:
   "excluded_documents": 1,
   "irrelevant_documents": 2,
   "active_source_categories": 3,
-  "convergence_score": 6.8,
+  "convergence_score": 8.5,
   "confidence": "medium",
   "score_components": {
-    "central_document_score": 3.0,
-    "source_diversity_score": 2.0,
-    "trust_weight_score": 1.2,
-    "recency_score": 0.6,
+    "central_document_score": 3.75,
+    "source_diversity_score": 2.5,
+    "trust_weight_score": 1.5,
+    "recency_score": 0.75,
     "duplication_penalty": 0.0
   },
   "limitations": [
@@ -200,10 +228,22 @@ Scoring rules:
 - newer documents receive mild recency credit
 - duplicate content hashes cannot inflate the positive score
 - duplicate contributing records apply a penalty
-- score bands are stable:
+- the score spans the full `0.0–10.0` range: component ceilings
+  (central `3.75`, diversity `2.5`, trust `2.5`, recency `1.25`) sum to `10.0`
+- score bands describe the score level only:
   - `0.0–2.9` = `low`
   - `3.0–6.9` = `medium`
   - `7.0–10.0` = `high`
+
+`confidence` is **separate from the score band**. It measures how much evidence
+supports the score — the number of distinct (deduplicated) contributing documents
+and how many institution categories agree — not the score's magnitude. A high
+score from a single document is reported as `low` confidence; a moderate score
+corroborated across many independent sources is not. Bands:
+
+- `high`: at least 6 contributing documents across at least 3 source categories
+- `medium`: at least 3 contributing documents across at least 2 source categories
+- `low`: otherwise
 
 ## Sprint guardrail
 

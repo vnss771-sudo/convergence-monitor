@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any
 
 from app.live_acceptance import evaluate_live_acceptance, load_live_verification_payload
+from app.persistence import write_json_atomic
 from app.runs.snapshots import make_run_id
 
 
@@ -219,11 +220,7 @@ def write_live_review_pack(
     )
 
     output_path = Path(output_dir) / f"{run_id}.json"
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(
-        json.dumps(review_pack, indent=2, sort_keys=True, ensure_ascii=False) + "\n",
-        encoding="utf-8",
-    )
+    write_json_atomic(output_path, review_pack)
     return output_path
 
 
@@ -245,8 +242,5 @@ def build_and_write_live_review_pack(
     review_pack["review_pack_path"] = str(review_pack_path)
 
     # Re-write with its own path included so the printed payload and artifact match.
-    review_pack_path.write_text(
-        json.dumps(review_pack, indent=2, sort_keys=True, ensure_ascii=False) + "\n",
-        encoding="utf-8",
-    )
+    write_json_atomic(review_pack_path, review_pack)
     return review_pack

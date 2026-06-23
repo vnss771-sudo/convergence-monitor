@@ -4,7 +4,7 @@ import hashlib
 import html
 import json
 import re
-from datetime import UTC, datetime
+from datetime import UTC
 from pathlib import Path
 from typing import Any
 
@@ -12,6 +12,11 @@ from dateutil import parser as date_parser
 from pydantic import ValidationError
 
 from app.models import DocumentRecord, IngestionSaveResult, Source
+from app.persistence import utc_now_iso
+
+# Upper bound on a single fetched feed payload (bytes). Feeds we monitor are well
+# under this; the cap protects against decompression bombs and runaway responses.
+MAX_RESPONSE_BYTES = 10 * 1024 * 1024
 
 
 class IngestionError(RuntimeError):
@@ -35,10 +40,6 @@ class FetchedDocuments(list[DocumentRecord]):
         super().__init__(documents)
         self.fetched_entries = fetched_entries
         self.skipped_invalid_entries = skipped_invalid_entries
-
-
-def utc_now_iso() -> str:
-    return datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
 def normalize_whitespace(value: str | None) -> str:
@@ -195,8 +196,16 @@ def fetch_rss_payload(source: Source, timeout_seconds: float = 20.0) -> bytes:
             errors.append(f"{url}: {exc}")
             continue
 
-        if response.content:
-            return response.content
+        content = response.content
+        # Bound the payload we process and persist so a malicious or
+        # misbehaving feed (httpx auto-decompresses gzip/deflate) cannot
+        # exhaust memory or disk downstream.
+        if len(content) > MAX_RESPONSE_BYTES:
+            errors.append(f"{url}: response exceeded {MAX_RESPONSE_BYTES}-byte limit")
+            continue
+
+        if content:
+            return content
 
         errors.append(f"{url}: empty response")
 
@@ -237,15 +246,19 @@ def xml_text(element: Any, child_name: str) -> str | None:
 def parse_rss_payload_stdlib(payload: bytes, source_id: str) -> list[dict[str, Any]]:
     """Minimal RSS/Atom parser used when feedparser is unavailable.
 
-    It intentionally extracts only the fields PR 2 needs. Project environments that
-    install dependencies will use feedparser; this fallback keeps tests and basic
-    ingestion portable.
+    It intentionally extracts only the fields PR 2 needs. This is also the default
+    parser when the optional feedparser extra is not installed, so it parses feed
+    bytes defensively: defusedxml blocks XXE, external-entity, and billion-laughs
+    style attacks that the stdlib parser would otherwise accept.
     """
     import xml.etree.ElementTree as ET
 
+    from defusedxml.ElementTree import fromstring as parse_xml_secure
+    from defusedxml.common import DefusedXmlException
+
     try:
-        root = ET.fromstring(payload)
-    except ET.ParseError as exc:
+        root = parse_xml_secure(payload)
+    except (ET.ParseError, DefusedXmlException) as exc:
         raise IngestionError(f"Failed to parse RSS feed '{source_id}': {exc}") from exc
 
     entries: list[dict[str, Any]] = []

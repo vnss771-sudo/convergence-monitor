@@ -7,12 +7,13 @@ direction, or future events.
 """
 from __future__ import annotations
 
-import json
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Iterable
 
 from dateutil import parser as date_parser
+
+from app.persistence import write_json_atomic
 
 from app.alerts.evidence_filter import filter_evidence_documents, matched_terms
 from app.models import (
@@ -224,17 +225,6 @@ def save_alert_json(
     *,
     processed_dir: Path | str = Path("data/processed"),
 ) -> Path:
-    output_dir = Path(processed_dir)
-    output_dir.mkdir(parents=True, exist_ok=True)
-    output_path = output_dir / f"{alert.scenario_id}_alert.json"
-    output_path.write_text(
-        json.dumps(
-            alert.model_dump(mode="json"),
-            indent=2,
-            sort_keys=True,
-            ensure_ascii=False,
-        )
-        + "\n",
-        encoding="utf-8",
-    )
+    output_path = Path(processed_dir) / f"{alert.scenario_id}_alert.json"
+    write_json_atomic(output_path, alert.model_dump(mode="json"))
     return output_path

@@ -1,10 +1,26 @@
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from typing import Any, Literal
 
 import yaml
 from pydantic import BaseModel, Field, HttpUrl, ValidationError, field_validator, model_validator
+
+# Source and scenario ids are interpolated into on-disk artifact file paths
+# (e.g. f"{source_id}.jsonl", f"{scenario_id}_score.json"). Restricting them to a
+# safe character set keeps a misconfigured config file from writing outside the
+# intended data directories.
+_SAFE_ID_PATTERN = re.compile(r"^[A-Za-z0-9_-]+$")
+
+
+def _validate_safe_id(value: str) -> str:
+    if not _SAFE_ID_PATTERN.fullmatch(value):
+        raise ValueError(
+            "id must contain only letters, digits, underscores, or hyphens "
+            f"(got {value!r})"
+        )
+    return value
 
 
 class RelevanceRules(BaseModel):
@@ -36,6 +52,8 @@ class Scenario(BaseModel):
     exclusion_terms: list[str] = Field(default_factory=list)
     relevance_rules: RelevanceRules
 
+    _validate_id = field_validator("id")(_validate_safe_id)
+
     @field_validator("primary_terms", "secondary_terms", "exclusion_terms")
     @classmethod
     def normalize_terms(cls, terms: list[str]) -> list[str]:
@@ -66,6 +84,8 @@ class Source(BaseModel):
     url: HttpUrl
     fallback_urls: list[HttpUrl] = Field(default_factory=list)
     timeout_seconds: float = Field(default=20.0, gt=0, le=120)
+
+    _validate_id = field_validator("id")(_validate_safe_id)
 
 
 class SourcesConfig(BaseModel):
@@ -166,11 +186,13 @@ class ScoreComponents(BaseModel):
     imply intent, coordination, causation, or future events.
     """
 
-    central_document_score: float = Field(ge=0, le=3)
-    source_diversity_score: float = Field(ge=0, le=2)
-    trust_weight_score: float = Field(ge=0, le=2)
-    recency_score: float = Field(ge=0, le=1)
-    duplication_penalty: float = Field(ge=0, le=2)
+    # Ceilings are the historical basis (3/2/2/1/2) scaled by 10/8 onto the 0–10
+    # convergence range; see app/scoring/convergence.py:SCORE_SCALE.
+    central_document_score: float = Field(ge=0, le=3.75)
+    source_diversity_score: float = Field(ge=0, le=2.5)
+    trust_weight_score: float = Field(ge=0, le=2.5)
+    recency_score: float = Field(ge=0, le=1.25)
+    duplication_penalty: float = Field(ge=0, le=2.5)
 
 
 BASELINE_LIMITATIONS: list[str] = [

@@ -8,10 +8,11 @@ from __future__ import annotations
 
 import json
 import re
-from datetime import UTC, datetime
 from pathlib import Path
 
 from pydantic import ValidationError
+
+from app.persistence import utc_now_iso
 
 from app.models import ClassifiedDocumentRecord, DocumentRecord, Scenario
 
@@ -55,10 +56,6 @@ INDEX_TITLE_PATTERNS: tuple[re.Pattern[str], ...] = (
 MIN_SUBSTANTIVE_SUMMARY_CHARS = 40
 MIN_SUBSTANTIVE_SUMMARY_WORDS = 6
 NEGATION_WINDOW_CHARS = 48
-
-
-def utc_now_iso() -> str:
-    return datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
 def normalize_text(text: str) -> str:
