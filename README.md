@@ -1,10 +1,37 @@
 # Convergence Monitor
 
-Public-document convergence monitor for institutional macro-condition scenarios.
+**Convergence Monitor watches what the world's financial institutions publicly
+say, and tells you — with a transparent, auditable score — when their published
+activity is converging around a specific macro scenario.**
 
-Sprint 1 focuses on a command-line JSON alert engine for one scenario:
+It continuously ingests public documents from authoritative institutions (the
+Bank for International Settlements, IMF, ECB, the U.S. Federal Reserve, the
+Reserve Bank of Australia) and, for a defined scenario, measures how much of that
+public activity is lining up. You get:
 
-`cbdc_payment_resilience`
+- a deterministic **0–10 convergence score**,
+- an **evidence-based confidence** rating (how much corroborating evidence backs
+  the score, independent of its magnitude), and
+- a **ranked trail of the exact public documents** behind every result.
+
+What makes it different is what it refuses to do. It does **not** predict,
+speculate, or infer intent or coordination. Every number is deterministic and
+reproducible — the same inputs always produce the same score, and each point
+traces back to specific public records. It is a signal you can defend in front of
+a skeptic, a regulator, or a risk committee.
+
+**Who it's for:** macro research desks, central-bank and policy analysts, risk
+teams, and journalists who need an early, *defensible* read on institutional
+alignment — without the overclaiming of typical trend or sentiment tools.
+
+**Where it is today (honest scope):** a working, well-tested command-line engine
+for a single scenario — `cbdc_payment_resilience` (cross-border CBDC and
+payment-system resilience). It produces JSON artifacts: ingested documents,
+classifications, scores, and alert cards. It does **not yet** ship a dashboard,
+alert delivery (email/Telegram), market-price feeds, or multiple scenarios. The
+roadmap toward those is in [`docs/reports/UNICORN_BUILD_PLAN.md`](docs/reports/UNICORN_BUILD_PLAN.md).
+
+---
 
 This project reports observable public-document convergence from public records.
 

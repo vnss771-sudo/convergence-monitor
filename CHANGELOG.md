@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Code council report and a companion build plan/roadmap (`docs/reports/CODE_COUNCIL_REPORT.md`, `docs/reports/UNICORN_BUILD_PLAN.md`).
+- Customer-facing lead section in the README describing what the project is, who it's for, and its honest current scope.
+- Pinned `constraints.txt` for reproducible installs; CI and release now install with `-c constraints.txt`.
 - `app/persistence.py`: atomic JSON writes (temp file + `os.replace` + `fsync`), a single canonical-JSON contract, a shared `utc_now_iso()`, and `read_json`/`iter_jsonl` helpers.
 - Onboarding scaffolding: `CONTRIBUTING.md`, `Makefile`, `.pre-commit-config.yaml`, and a `docs/README.md` documentation index.
 - Console entry point `convergence-monitor` and a `[build-system]` table in `pyproject.toml`.
