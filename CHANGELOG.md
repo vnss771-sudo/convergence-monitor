@@ -9,19 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Code council report and a companion build plan/roadmap (`docs/reports/CODE_COUNCIL_REPORT.md`, `docs/reports/UNICORN_BUILD_PLAN.md`).
-- Package migration tooling for renaming `app` to `convergence_monitor`.
-- Phase 3 release packaging and supply-chain hardening (release provenance and inspectable release evidence).
+- `app/persistence.py`: atomic JSON writes (temp file + `os.replace` + `fsync`), a single canonical-JSON contract, a shared `utc_now_iso()`, and `read_json`/`iter_jsonl` helpers.
+- Onboarding scaffolding: `CONTRIBUTING.md`, `Makefile`, `.pre-commit-config.yaml`, and a `docs/README.md` documentation index.
+- Console entry point `convergence-monitor` and a `[build-system]` table in `pyproject.toml`.
+- Tests covering the real RSS/Atom parser, `parse_datetime` timezone normalization, the persistence helpers, and the new security behaviors (+36 tests).
 
 ### Changed
-- Split the CLI architecture so command behavior no longer all lives in `app/cli.py`.
-- Bumped pinned GitHub Actions (`checkout`, `setup-python`, `upload-artifact`, `codeql-action`).
-- Applied code-quality improvements drawn from the analysis report.
+- Made `feedparser` an optional `[parse]` extra so the default install no longer fails building its transitive `sgmllib3k` sdist; ingestion falls back to a hardened stdlib RSS/Atom parser when `feedparser` is absent.
+- Split the CLI architecture so command behavior no longer all lives in `app/cli.py`, and removed the copied import blocks / blanket `# ruff: noqa: F401` left by the split (248 dead imports removed).
+- Moved historical process logs out of the repository root into `docs/history/`.
+- Routed all single-object JSON artifact writers through the atomic persistence helper.
+
+### Security
+- Parse feed XML with `defusedxml`, blocking XXE / external-entity / billion-laughs attacks on the (now default) stdlib parser path.
+- Cap fetched feed payloads at 10 MiB to prevent decompression-bomb / runaway-response resource exhaustion.
+- Restrict `Source.id` / `Scenario.id` to `[A-Za-z0-9_-]`, defusing latent path traversal where ids are interpolated into artifact file paths.
 
 ### Fixed
-- Fixed a critical install break.
-- Made `feedparser` an optional `[parse]` extra so the default install no longer fails on its transitive `sgmllib3k` sdist; ingestion falls back to a stdlib RSS/Atom parser when `feedparser` is absent.
-- Corrected the release source-zip output path.
-- Removed unused imports flagged by Ruff.
+- Fixed the critical install break (clean `pip install -e '.[dev]'` now succeeds without environment workarounds).
+- Moved the coverage gate into `pyproject.toml` (with branch coverage) so it is reproducible locally, not only in CI.
 
 ## [0.1.0]
 
