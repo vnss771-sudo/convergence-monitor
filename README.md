@@ -230,6 +230,7 @@ Scoring rules:
 - duplicate contributing records apply a penalty
 - the score spans the full `0.0–10.0` range: component ceilings
   (central `3.75`, diversity `2.5`, trust `2.5`, recency `1.25`) sum to `10.0`
+  (components are shown rounded to one decimal and always reconcile to the score)
 - score bands describe the score level only:
   - `0.0–2.9` = `low`
   - `3.0–6.9` = `medium`

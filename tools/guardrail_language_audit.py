@@ -39,10 +39,13 @@ EXCLUDED_TOP_LEVEL_DIRS = {
     "tools",
 }
 
-# Historical process logs are archived verbatim under docs/history/ and are not
-# outward-facing copy, so the non-speculative guardrail does not apply to them.
+# docs/history/ (archived process logs) and docs/reports/ (internal engineering
+# audits and build plans) are not outward-facing/policy-facing copy; they
+# legitimately discuss terms like "forecast", "prediction", and "confirm" while
+# analyzing the methodology, so the non-speculative guardrail does not apply.
 EXCLUDED_PATH_PREFIXES = (
     ("docs", "history"),
+    ("docs", "reports"),
 )
 
 EXCLUDED_RELATIVE_PATHS = {

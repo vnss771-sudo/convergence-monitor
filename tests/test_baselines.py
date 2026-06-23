@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from datetime import date, timedelta
 from pathlib import Path
 
 from typer.testing import CliRunner
@@ -84,7 +85,9 @@ def test_missing_baseline_comparison_is_explicit(tmp_path: Path) -> None:
     assert comparison.comparison == "not_enough_history"
 
 
-def test_available_baseline_comparison_is_descriptive_only(tmp_path: Path) -> None:
+def test_baseline_withholds_direction_without_enough_history(tmp_path: Path) -> None:
+    # A single prior observation is not enough time-spanning history to speak
+    # directionally; the comparison stays descriptive.
     baseline_score = make_score([])
     current_score = make_score([make_classified(document_id="doc1")])
 
@@ -93,9 +96,46 @@ def test_available_baseline_comparison_is_descriptive_only(tmp_path: Path) -> No
 
     assert comparison.status == "baseline_available"
     assert comparison.baseline_observation_count == 1
-    assert comparison.comparison == "above_baseline"
+    assert comparison.comparison == "not_enough_history"
+    assert comparison.delta_vs_baseline_average is None
+    assert comparison.baseline_average_score is None
     assert comparison.current_score == current_score.convergence_score
-    assert current_score.convergence_score > baseline_score.convergence_score
+
+
+def test_same_day_observations_do_not_unlock_direction(tmp_path: Path) -> None:
+    # Many observations crammed into one day must not satisfy the time-span gate.
+    for i in range(12):
+        score = make_score([make_classified(document_id=f"d{j}") for j in range(i + 1)])
+        add_baseline_observation(
+            score=score, baselines_dir=tmp_path, observed_at="2026-03-01T00:00:00Z"
+        )
+    current = make_score([make_classified(document_id="cur")])
+    comparison = compare_score_to_baseline(score=current, baselines_dir=tmp_path)
+    assert comparison.comparison == "not_enough_history"
+
+
+def test_baseline_reports_direction_with_enough_spanning_history(tmp_path: Path) -> None:
+    # Build >= MIN_REFERENCE_BUCKETS daily buckets spanning >= REFERENCE_GATE_DAYS,
+    # each a distinct score so none are deduplicated.
+    base = date(2026, 1, 1)
+    for i in range(9):  # every 4 days -> 9 buckets spanning 32 days
+        day = base + timedelta(days=i * 4)
+        score = make_score([make_classified(document_id=f"d{j}") for j in range(i + 1)])
+        add_baseline_observation(
+            score=score,
+            baselines_dir=tmp_path,
+            observed_at=f"{day.isoformat()}T00:00:00Z",
+        )
+
+    current = make_score([make_classified(document_id="cur")])
+    comparison = compare_score_to_baseline(score=current, baselines_dir=tmp_path)
+
+    # The most recent day is excluded as "current"; >= 8 prior buckets over >= 28
+    # days unlock a real directional comparison against the trailing window.
+    assert comparison.status == "baseline_available"
+    assert comparison.comparison != "not_enough_history"
+    assert comparison.delta_vs_baseline_average is not None
+    assert comparison.baseline_average_score is not None
 
 
 def test_duplicate_baseline_observation_is_suppressed(tmp_path: Path) -> None:

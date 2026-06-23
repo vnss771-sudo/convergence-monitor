@@ -266,3 +266,95 @@ def test_score_cli_reads_classified_jsonl_and_writes_score_json(tmp_path: Path) 
     assert payload["scenario_id"] == "cbdc_payment_resilience"
     assert payload["window_days"] == 30
     assert (processed_dir / "cbdc_payment_resilience_score.json").exists()
+
+
+# --- Cycle 2: invariant & boundary regression tests ---------------------------
+
+
+def _central(document_id: str, source_id: str, source_category: str, content_hash: str):
+    name = {
+        "bis": "Bank for International Settlements",
+        "imf": "International Monetary Fund",
+        "rba": "Reserve Bank of Australia",
+        "ecb": "European Central Bank",
+        "federal_reserve": "Federal Reserve",
+    }[source_id]
+    return make_classified(
+        document_id=document_id,
+        source_id=source_id,
+        source_name=name,
+        source_category=source_category,
+        relevance="central",
+        content_hash=content_hash,
+    )
+
+
+def test_score_equals_sum_of_components_minus_penalty() -> None:
+    """The explainable invariant: published components reconcile to the score."""
+    bundle = load_configs(PROJECT_ROOT / "config")
+    documents = [
+        _central("d1", "bis", "central_bank_coordination", make_hash("a")),
+        _central("d2", "imf", "international_finance", make_hash("b")),
+        _central("d3", "rba", "national_central_bank", make_hash("c")),
+        _central("d4", "ecb", "national_central_bank", make_hash("b")),  # dup hash -> penalty
+    ]
+    score = score_documents(
+        documents, bundle=bundle, scenario_id="cbdc_payment_resilience", window_days=30
+    )
+    c = score.score_components
+    expected = round(
+        min(
+            10.0,
+            c.central_document_score
+            + c.source_diversity_score
+            + c.trust_weight_score
+            + c.recency_score
+            - c.duplication_penalty,
+        ),
+        1,
+    )
+    assert score.convergence_score == expected
+
+
+def test_score_is_always_within_zero_to_ten() -> None:
+    bundle = load_configs(PROJECT_ROOT / "config")
+    # Many duplicate-heavy and many-central document sets must still clamp to [0, 10].
+    documents = [
+        _central(f"d{i}", sid, cat, make_hash(chr(97 + i)))
+        for i, (sid, cat) in enumerate(
+            [
+                ("bis", "central_bank_coordination"),
+                ("imf", "international_finance"),
+                ("rba", "national_central_bank"),
+                ("ecb", "national_central_bank"),
+                ("federal_reserve", "national_central_bank"),
+            ]
+        )
+    ]
+    score = score_documents(
+        documents, bundle=bundle, scenario_id="cbdc_payment_resilience", window_days=3650
+    )
+    assert 0.0 <= score.convergence_score <= 10.0
+
+
+@pytest.mark.parametrize(
+    ("docs", "categories", "expected"),
+    [
+        (2, 2, "low"),   # too few documents
+        (3, 1, "low"),   # too few categories
+        (3, 2, "medium"),
+        (5, 3, "medium"),  # just below the high doc threshold
+        (6, 2, "medium"),  # enough docs but too few categories
+        (6, 3, "high"),
+        (8, 3, "high"),
+    ],
+)
+def test_confidence_band_edges(docs: int, categories: int, expected: str) -> None:
+    from app.scoring.convergence import confidence_for_evidence
+
+    assert (
+        confidence_for_evidence(
+            unique_contributor_count=docs, active_source_categories=categories
+        )
+        == expected
+    )

@@ -262,27 +262,34 @@ def score_documents(
     duplicate_count = max(0, len(contributing_documents) - len(unique_contributors))
     penalty_basis = min(2.0, duplicate_count * 0.5)
 
-    central_document_score = central_basis * SCORE_SCALE
-    source_diversity_score = diversity_basis * SCORE_SCALE
-    trust_weight_score = trust_basis * SCORE_SCALE
-    recency_score = recency_basis * SCORE_SCALE
-    duplication_penalty = penalty_basis * SCORE_SCALE
+    # Round each component once, then derive the score from those rounded values so
+    # the published breakdown reconciles exactly: convergence_score equals
+    # (Σ positive components − penalty), clamped to 0–10. Rounding the score
+    # independently of the components (the previous behavior) let the two drift by up
+    # to 0.2, which is unacceptable for an explainable, auditable score.
+    central_document_score = round(central_basis * SCORE_SCALE, 1)
+    source_diversity_score = round(diversity_basis * SCORE_SCALE, 1)
+    trust_weight_score = round(trust_basis * SCORE_SCALE, 1)
+    recency_score = round(recency_basis * SCORE_SCALE, 1)
+    duplication_penalty = round(penalty_basis * SCORE_SCALE, 1)
 
-    raw_score = (
-        central_document_score
-        + source_diversity_score
-        + trust_weight_score
-        + recency_score
-        - duplication_penalty
+    convergence_score = round(
+        clamp_score(
+            central_document_score
+            + source_diversity_score
+            + trust_weight_score
+            + recency_score
+            - duplication_penalty
+        ),
+        1,
     )
-    convergence_score = round(clamp_score(raw_score), 1)
 
     components = ScoreComponents(
-        central_document_score=round(central_document_score, 1),
-        source_diversity_score=round(source_diversity_score, 1),
-        trust_weight_score=round(trust_weight_score, 1),
-        recency_score=round(recency_score, 1),
-        duplication_penalty=round(duplication_penalty, 1),
+        central_document_score=central_document_score,
+        source_diversity_score=source_diversity_score,
+        trust_weight_score=trust_weight_score,
+        recency_score=recency_score,
+        duplication_penalty=duplication_penalty,
     )
 
     return ScenarioScoreRecord(
