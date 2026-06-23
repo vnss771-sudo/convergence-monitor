@@ -2,13 +2,12 @@ from __future__ import annotations
 
 import hashlib
 import json
-from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from app.persistence import utc_now_iso, write_json_atomic
 
-def utc_now_iso() -> str:
-    return datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+__all__ = ["utc_now_iso", "write_json_atomic"]  # re-exported for existing importers
 
 
 def safe_timestamp(value: str) -> str:
@@ -86,10 +85,7 @@ def write_run_snapshot(
     if error is not None:
         payload["error"] = error
 
-    output_path.write_text(
-        json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=False) + "\n",
-        encoding="utf-8",
-    )
+    write_json_atomic(output_path, payload)
     return output_path
 
 

@@ -5,7 +5,6 @@ It does not generate alerts, predictions, or narrative interpretations.
 """
 from __future__ import annotations
 
-import json
 import re
 from collections.abc import Iterable
 from datetime import datetime, timedelta
@@ -20,6 +19,7 @@ from app.models import (
     ScenarioScoreRecord,
     ScoreComponents,
 )
+from app.persistence import write_json_atomic
 from app.scoring.baselines import missing_baseline_comparison
 
 
@@ -284,19 +284,6 @@ def save_score_json(
     *,
     processed_dir: Path | str = Path("data/processed"),
 ) -> Path:
-    output_dir = Path(processed_dir)
-    output_dir.mkdir(parents=True, exist_ok=True)
-    output_path = output_dir / f"{score.scenario_id}_score.json"
-
-    output_path.write_text(
-        json.dumps(
-            score.model_dump(mode="json"),
-            indent=2,
-            sort_keys=True,
-            ensure_ascii=False,
-        )
-        + "\n",
-        encoding="utf-8",
-    )
-
+    output_path = Path(processed_dir) / f"{score.scenario_id}_score.json"
+    write_json_atomic(output_path, score.model_dump(mode="json"))
     return output_path

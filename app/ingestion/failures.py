@@ -1,13 +1,10 @@
 from __future__ import annotations
 
 import json
-from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-
-def utc_now_iso() -> str:
-    return datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+from app.persistence import utc_now_iso, write_json_atomic
 
 
 def ingestion_error_payload(
@@ -95,11 +92,7 @@ def update_source_health(
     payload["updated_at"] = now
 
     path = source_health_path(runs_dir)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=False) + "\n",
-        encoding="utf-8",
-    )
+    write_json_atomic(path, payload)
     return path
 
 

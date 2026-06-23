@@ -4,7 +4,7 @@ import hashlib
 import html
 import json
 import re
-from datetime import UTC, datetime
+from datetime import UTC
 from pathlib import Path
 from typing import Any
 
@@ -12,6 +12,7 @@ from dateutil import parser as date_parser
 from pydantic import ValidationError
 
 from app.models import DocumentRecord, IngestionSaveResult, Source
+from app.persistence import utc_now_iso
 
 
 class IngestionError(RuntimeError):
@@ -35,10 +36,6 @@ class FetchedDocuments(list[DocumentRecord]):
         super().__init__(documents)
         self.fetched_entries = fetched_entries
         self.skipped_invalid_entries = skipped_invalid_entries
-
-
-def utc_now_iso() -> str:
-    return datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
 def normalize_whitespace(value: str | None) -> str:

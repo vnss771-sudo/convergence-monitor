@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 from pathlib import Path
 from typing import Any
 
@@ -9,6 +8,7 @@ from app.classification.keyword_matcher import classify_documents, save_classifi
 from app.ingestion.failures import ingestion_error_payload, update_source_health
 from app.ingestion.rss_base import fetch_rss_documents, save_documents_jsonl
 from app.models import ConfigBundle, DocumentRecord
+from app.persistence import write_json_atomic
 from app.runs.snapshots import make_run_id, utc_now_iso, write_run_snapshot
 from app.scoring.baselines import baseline_show_payload, compare_score_to_baseline
 from app.scoring.convergence import save_score_json, score_documents
@@ -134,13 +134,8 @@ def write_live_verification_artifact(
         timestamp=created_at,
         window_days=int(payload["window_days"]),
     )
-    output_dir = Path(runs_dir) / "live_verifications"
-    output_dir.mkdir(parents=True, exist_ok=True)
-    output_path = output_dir / f"{run_id}.json"
-    output_path.write_text(
-        json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=False) + "\n",
-        encoding="utf-8",
-    )
+    output_path = Path(runs_dir) / "live_verifications" / f"{run_id}.json"
+    write_json_atomic(output_path, payload)
     return output_path
 
 
@@ -448,9 +443,6 @@ def run_live_verification(
     payload["run_snapshot_path"] = str(run_path)
 
     # Re-write the artifact with paths included in the operator payload.
-    verification_path.write_text(
-        json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=False) + "\n",
-        encoding="utf-8",
-    )
+    write_json_atomic(verification_path, payload)
 
     return payload

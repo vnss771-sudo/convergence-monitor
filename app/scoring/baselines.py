@@ -14,7 +14,7 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 from app.models import BASELINE_LIMITATIONS, BaselineComparison, ScenarioScoreRecord
-from app.runs.snapshots import utc_now_iso
+from app.persistence import utc_now_iso, write_json_atomic
 
 
 class BaselineRecord(BaseModel):
@@ -126,17 +126,7 @@ def save_baseline_store(
     baselines_dir: Path | str = Path("data/baselines"),
 ) -> Path:
     output_path = baseline_path(scenario_id=store.scenario_id, baselines_dir=baselines_dir)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(
-        json.dumps(
-            store.model_dump(mode="json"),
-            indent=2,
-            sort_keys=True,
-            ensure_ascii=False,
-        )
-        + "\n",
-        encoding="utf-8",
-    )
+    write_json_atomic(output_path, store.model_dump(mode="json"))
     return output_path
 
 
