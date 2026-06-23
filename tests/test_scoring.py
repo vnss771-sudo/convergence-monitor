@@ -9,7 +9,7 @@ import pytest
 
 from app.models import ClassifiedDocumentRecord, load_configs
 from app.scoring.convergence import (
-    confidence_for_score,
+    confidence_for_evidence,
     parse_window_days,
     save_score_json,
     score_documents,
@@ -71,11 +71,15 @@ def test_parse_window_days_accepts_day_window_only() -> None:
         parse_window_days("one month")
 
 
-def test_confidence_bands_are_stable() -> None:
-    assert confidence_for_score(2.9) == "low"
-    assert confidence_for_score(3.0) == "medium"
-    assert confidence_for_score(6.9) == "medium"
-    assert confidence_for_score(7.0) == "high"
+def test_confidence_reflects_evidence_not_score_magnitude() -> None:
+    # Thin evidence is low confidence regardless of the score it produced.
+    assert confidence_for_evidence(unique_contributor_count=1, active_source_categories=1) == "low"
+    assert confidence_for_evidence(unique_contributor_count=2, active_source_categories=3) == "low"
+    # Corroboration across multiple documents and categories raises confidence.
+    assert confidence_for_evidence(unique_contributor_count=3, active_source_categories=2) == "medium"
+    assert confidence_for_evidence(unique_contributor_count=6, active_source_categories=3) == "high"
+    # Many documents but only one category is not broad agreement.
+    assert confidence_for_evidence(unique_contributor_count=8, active_source_categories=1) == "low"
 
 
 def test_score_documents_is_explainable_and_deduplicates_content_hashes() -> None:
@@ -149,9 +153,9 @@ def test_score_documents_is_explainable_and_deduplicates_content_hashes() -> Non
     assert score.excluded_documents == 1
     assert score.irrelevant_documents == 1
     assert score.active_source_categories == 3
-    assert score.score_components.source_diversity_score == 2.0
-    assert score.score_components.duplication_penalty == 0.5
-    assert score.convergence_score == 5.4
+    assert score.score_components.source_diversity_score == 2.5
+    assert score.score_components.duplication_penalty == 0.6
+    assert score.convergence_score == 6.8
     assert score.confidence == "medium"
     assert score.limitations == [
         "Baseline model is provisional.",

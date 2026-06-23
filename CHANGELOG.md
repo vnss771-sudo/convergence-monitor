@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tests covering the real RSS/Atom parser, `parse_datetime` timezone normalization, the persistence helpers, and the new security behaviors (+36 tests).
 
 ### Changed
+- Convergence score now spans the full documented `0–10` range: component ceilings were rescaled by `10/8` so the `high` band is reachable (the score previously maxed out at `8.0`). Relative component weighting is unchanged.
+- `confidence` is now derived from evidence sufficiency (count of distinct contributing documents and agreeing source categories) instead of being a relabeling of the score band, so it carries information independent of the score. See `docs/SCORING_GOVERNANCE.md` for before/after evidence.
 - Made `feedparser` an optional `[parse]` extra so the default install no longer fails building its transitive `sgmllib3k` sdist; ingestion falls back to a hardened stdlib RSS/Atom parser when `feedparser` is absent.
 - Split the CLI architecture so command behavior no longer all lives in `app/cli.py`, and removed the copied import blocks / blanket `# ruff: noqa: F401` left by the split (248 dead imports removed).
 - Moved historical process logs out of the repository root into `docs/history/`.

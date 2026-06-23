@@ -186,11 +186,13 @@ class ScoreComponents(BaseModel):
     imply intent, coordination, causation, or future events.
     """
 
-    central_document_score: float = Field(ge=0, le=3)
-    source_diversity_score: float = Field(ge=0, le=2)
-    trust_weight_score: float = Field(ge=0, le=2)
-    recency_score: float = Field(ge=0, le=1)
-    duplication_penalty: float = Field(ge=0, le=2)
+    # Ceilings are the historical basis (3/2/2/1/2) scaled by 10/8 onto the 0–10
+    # convergence range; see app/scoring/convergence.py:SCORE_SCALE.
+    central_document_score: float = Field(ge=0, le=3.75)
+    source_diversity_score: float = Field(ge=0, le=2.5)
+    trust_weight_score: float = Field(ge=0, le=2.5)
+    recency_score: float = Field(ge=0, le=1.25)
+    duplication_penalty: float = Field(ge=0, le=2.5)
 
 
 BASELINE_LIMITATIONS: list[str] = [

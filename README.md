@@ -167,13 +167,13 @@ Expected output shape:
   "excluded_documents": 1,
   "irrelevant_documents": 2,
   "active_source_categories": 3,
-  "convergence_score": 6.8,
+  "convergence_score": 8.5,
   "confidence": "medium",
   "score_components": {
-    "central_document_score": 3.0,
-    "source_diversity_score": 2.0,
-    "trust_weight_score": 1.2,
-    "recency_score": 0.6,
+    "central_document_score": 3.75,
+    "source_diversity_score": 2.5,
+    "trust_weight_score": 1.5,
+    "recency_score": 0.75,
     "duplication_penalty": 0.0
   },
   "limitations": [
@@ -200,10 +200,22 @@ Scoring rules:
 - newer documents receive mild recency credit
 - duplicate content hashes cannot inflate the positive score
 - duplicate contributing records apply a penalty
-- score bands are stable:
+- the score spans the full `0.0–10.0` range: component ceilings
+  (central `3.75`, diversity `2.5`, trust `2.5`, recency `1.25`) sum to `10.0`
+- score bands describe the score level only:
   - `0.0–2.9` = `low`
   - `3.0–6.9` = `medium`
   - `7.0–10.0` = `high`
+
+`confidence` is **separate from the score band**. It measures how much evidence
+supports the score — the number of distinct (deduplicated) contributing documents
+and how many institution categories agree — not the score's magnitude. A high
+score from a single document is reported as `low` confidence; a moderate score
+corroborated across many independent sources is not. Bands:
+
+- `high`: at least 6 contributing documents across at least 3 source categories
+- `medium`: at least 3 contributing documents across at least 2 source categories
+- `low`: otherwise
 
 ## Sprint guardrail
 

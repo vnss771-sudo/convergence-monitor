@@ -1,6 +1,6 @@
 {
   "confidence": "medium",
-  "convergence_score": 6.0,
+  "convergence_score": 7.5,
   "document_count": 3,
   "evidence": [
     {
@@ -73,7 +73,7 @@
   "scenario_id": "cbdc_payment_resilience",
   "scenario_name": "Cross-border CBDC and payment-system resilience convergence",
   "source_categories_active": 3,
-  "summary": "Public institutional activity related to CBDC and payment-system resilience is present across the classified source set.",
+  "summary": "Public institutional activity related to CBDC and payment-system resilience is elevated across the classified source set.",
   "warnings": [
     "Baseline model is provisional.",
     "Market-price module is disabled.",
