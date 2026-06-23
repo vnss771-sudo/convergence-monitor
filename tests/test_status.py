@@ -165,7 +165,7 @@ def test_status_cli_reports_complete_scenario_state(tmp_path: Path) -> None:
     assert payload["baseline"] == {
         "status": "baseline_available",
         "observation_count": 1,
-        "comparison": "near_baseline",
+        "comparison": "not_enough_history",
     }
     assert payload["source_health"]["sources_total"] == 5
     assert payload["source_health"]["sources_ok"] == 4

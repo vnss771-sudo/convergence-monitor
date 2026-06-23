@@ -73,3 +73,21 @@ evidence), reinforcing the guard rather than weakening it.
 **Not yet done (tracked in the build plan).** Component weights remain
 expert-set, not calibrated against a labeled evaluation set. This correction makes
 the range honest; it does not yet validate the weights.
+
+### Score additivity + anchored baseline
+
+**Additivity.** `convergence_score` is now derived from the already-rounded
+components — `score = clamp(Σ positive components − penalty)` — so the published
+breakdown reconciles exactly to the score (previously the score was rounded from
+the unrounded sum, allowing up to 0.2 drift). `ScoreComponents` ceilings are
+expressed as one-decimal display maxima. A regression test pins the invariant.
+
+**Baseline anchoring.** Baseline comparison no longer compares a score to the
+running mean of all its own past scores. Observations are collapsed to one per
+calendar day; the reference is a fixed trailing window (`REFERENCE_WINDOW_DAYS`)
+that **excludes the current day**; and directional language
+(`above`/`below`/`near_baseline`) is withheld — returning `not_enough_history` with
+descriptive stats only — until there are at least `MIN_REFERENCE_BUCKETS` daily
+buckets spanning at least `REFERENCE_GATE_DAYS`. This removes the cadence-gaming and
+self-reference of the previous design. No schema change (the directional fields
+were already nullable).
