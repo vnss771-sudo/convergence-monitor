@@ -31,11 +31,9 @@ jobs:
       - name: Ruff
         run: python -m ruff check app tests
 
-      - name: Tests
+      - name: Tests + coverage gate
+        # Coverage flags and --cov-fail-under live in pyproject [tool.pytest.ini_options].
         run: python -m pytest -q
-
-      - name: Coverage
-        run: python -m pytest --cov=app --cov-report=term-missing --cov-fail-under=80 -q
 
       - name: Compile
         run: python -m compileall -q app tests
