@@ -118,6 +118,49 @@ def test_parse_rss_payload_malformed_raises():
         parse_rss_payload(MALFORMED, "example")
 
 
+XXE_BILLION_LAUGHS = b"""<?xml version="1.0"?>
+<!DOCTYPE lolz [
+  <!ENTITY lol "lol">
+  <!ENTITY lol2 "&lol;&lol;&lol;&lol;&lol;">
+  <!ENTITY lol3 "&lol2;&lol2;&lol2;&lol2;&lol2;">
+]>
+<rss version="2.0"><channel><item><title>&lol3;</title></item></channel></rss>
+"""
+
+
+def test_stdlib_rejects_entity_expansion_attack():
+    # defusedxml must refuse the internal-entity payload rather than expand it.
+    with pytest.raises(IngestionError):
+        parse_rss_payload_stdlib(XXE_BILLION_LAUGHS, "example")
+
+
+def test_fetch_rss_payload_rejects_oversized_response(monkeypatch):
+    from app.ingestion import rss_base
+    from app.models import Source
+
+    monkeypatch.setattr(rss_base, "MAX_RESPONSE_BYTES", 16)
+
+    source = Source(
+        id="bis",
+        name="BIS",
+        category="central_bank_coordination",
+        type="rss",
+        trust_weight=1.0,
+        url="https://example.com/feed.xml",
+    )
+
+    class FakeResponse:
+        content = b"x" * 1024  # exceeds the patched 16-byte cap
+
+        def raise_for_status(self):
+            return None
+
+    monkeypatch.setattr("httpx.get", lambda url, timeout, follow_redirects: FakeResponse())
+
+    with pytest.raises(IngestionError, match="exceeded"):
+        rss_base.fetch_rss_payload(source, timeout_seconds=1.0)
+
+
 @pytest.mark.parametrize(
     ("value", "expected"),
     [
