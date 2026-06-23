@@ -14,11 +14,12 @@ public activity is lining up. You get:
   the score, independent of its magnitude), and
 - a **ranked trail of the exact public documents** behind every result.
 
-What makes it different is what it refuses to do. It does **not** predict,
-speculate, or infer intent or coordination. Every number is deterministic and
-reproducible — the same inputs always produce the same score, and each point
-traces back to specific public records. It is a signal you can defend in front of
-a skeptic, a regulator, or a risk committee.
+What sets it apart is its restraint. It reports only what public documents
+observably show — it does not claim to read institutional intent, anticipate
+events, or assert coordination. Every number is deterministic and reproducible —
+the same inputs always produce the same score, and each point traces back to
+specific public records. It is a signal you can defend in front of a skeptic, a
+regulator, or a risk committee.
 
 **Who it's for:** macro research desks, central-bank and policy analysts, risk
 teams, and journalists who need an early, *defensible* read on institutional

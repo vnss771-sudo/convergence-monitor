@@ -39,10 +39,14 @@ EXCLUDED_TOP_LEVEL_DIRS = {
     "tools",
 }
 
+# Historical process logs are archived verbatim under docs/history/ and are not
+# outward-facing copy, so the non-speculative guardrail does not apply to them.
+EXCLUDED_PATH_PREFIXES = (
+    ("docs", "history"),
+)
+
 EXCLUDED_RELATIVE_PATHS = {
     Path("SECURITY.md"),
-    Path("SPRINT_1_EXECUTION.md"),
-    Path("SPRINT_2_EXECUTION.md"),
     Path("tools/guardrail_language_audit.py"),
     Path("docs/GUARDRAIL_LANGUAGE_POLICY.md"),
     Path("docs/ARCHITECTURE_NEXT.md"),
@@ -108,6 +112,9 @@ def is_excluded(path: Path) -> bool:
         return True
 
     if relative in EXCLUDED_RELATIVE_PATHS:
+        return True
+
+    if any(relative.parts[: len(prefix)] == prefix for prefix in EXCLUDED_PATH_PREFIXES):
         return True
 
     if relative.parts and relative.parts[0] in EXCLUDED_TOP_LEVEL_DIRS:
