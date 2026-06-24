@@ -21,6 +21,7 @@ from app.models import (
 )
 from app.persistence import write_json_atomic
 from app.scoring.baselines import missing_baseline_comparison
+from app.scoring.weights import DEFAULT_WEIGHTS, ScoringWeights
 
 
 LIMITATIONS = [
@@ -185,22 +186,23 @@ def _recency_credit(
     document: ClassifiedDocumentRecord,
     *,
     as_of: datetime | None,
+    weights: ScoringWeights = DEFAULT_WEIGHTS,
 ) -> float:
     if as_of is None:
-        return 0.2
+        return weights.recency_unknown_credit
 
     published_at = parse_document_datetime(document.published_at)
     if published_at is None:
-        return 0.2
+        return weights.recency_unknown_credit
 
     age_days = max(0, (as_of - published_at).days)
-    if age_days <= 7:
-        return 1.0
-    if age_days <= 14:
-        return 0.7
-    if age_days <= 30:
-        return 0.4
-    return 0.0
+    if age_days <= weights.recency_recent_days:
+        return weights.recency_recent_credit
+    if age_days <= weights.recency_mid_days:
+        return weights.recency_mid_credit
+    if age_days <= weights.recency_old_days:
+        return weights.recency_old_credit
+    return weights.recency_stale_credit
 
 
 def score_documents(
@@ -209,6 +211,7 @@ def score_documents(
     bundle: ConfigBundle,
     scenario_id: str,
     window_days: int,
+    weights: ScoringWeights = DEFAULT_WEIGHTS,
 ) -> ScenarioScoreRecord:
     # Validate scenario exists even though PR 4 does not use scenario text directly.
     bundle.get_scenario(scenario_id)
@@ -233,34 +236,37 @@ def score_documents(
 
     # Component basis values (max sum 8.0); each is scaled onto the 0–10 range below.
     central_basis = min(
-        3.0,
-        unique_central_count * 0.75 + unique_incidental_count * 0.15,
+        weights.central_cap,
+        unique_central_count * weights.central_per_doc
+        + unique_incidental_count * weights.incidental_per_doc,
     )
 
     if active_source_categories == 0:
         diversity_basis = 0.0
     elif active_source_categories == 1:
-        diversity_basis = 0.75
+        diversity_basis = weights.diversity_one
     elif active_source_categories == 2:
-        diversity_basis = 1.50
+        diversity_basis = weights.diversity_two
     else:
-        diversity_basis = 2.00
+        diversity_basis = weights.diversity_many
 
     trust_basis = min(
-        2.0,
-        sum(source_weights.get(source_id, 0.0) for source_id in active_source_ids) * 0.5,
+        weights.trust_cap,
+        sum(source_weights.get(source_id, 0.0) for source_id in active_source_ids)
+        * weights.trust_multiplier,
     )
 
     as_of = _as_of_datetime(window_documents)
     if unique_contributors:
         recency_basis = sum(
-            _recency_credit(document, as_of=as_of) for document in unique_contributors
+            _recency_credit(document, as_of=as_of, weights=weights)
+            for document in unique_contributors
         ) / len(unique_contributors)
     else:
         recency_basis = 0.0
 
     duplicate_count = max(0, len(contributing_documents) - len(unique_contributors))
-    penalty_basis = min(2.0, duplicate_count * 0.5)
+    penalty_basis = min(weights.penalty_cap, duplicate_count * weights.penalty_per_duplicate)
 
     # Round each component once, then derive the score from those rounded values so
     # the published breakdown reconciles exactly: convergence_score equals

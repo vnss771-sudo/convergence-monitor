@@ -1,0 +1,83 @@
+{
+  "confidence": "medium",
+  "convergence_score": 7.5,
+  "document_count": 3,
+  "evidence": [
+    {
+      "matched_terms": [
+        "cbdc",
+        "cross-border payments",
+        "settlement infrastructure",
+        "financial market infrastructure"
+      ],
+      "published_at": "2026-05-19T00:00:00Z",
+      "quality_flags": [
+        "central_relevance",
+        "primary_terms_present",
+        "multiple_primary_terms"
+      ],
+      "reason": "central fixture",
+      "relevance": "central",
+      "source_category": "central_bank_coordination",
+      "source_id": "bis",
+      "source_name": "Bank for International Settlements",
+      "title": "central_bis title",
+      "url": "https://example.com/central_bis"
+    },
+    {
+      "matched_terms": [
+        "cbdc",
+        "cross-border payments",
+        "settlement infrastructure",
+        "financial market infrastructure"
+      ],
+      "published_at": "2026-05-18T00:00:00Z",
+      "quality_flags": [
+        "central_relevance",
+        "primary_terms_present",
+        "multiple_primary_terms"
+      ],
+      "reason": "central fixture",
+      "relevance": "central",
+      "source_category": "international_finance",
+      "source_id": "imf",
+      "source_name": "International Monetary Fund",
+      "title": "central_imf title",
+      "url": "https://example.com/central_imf"
+    },
+    {
+      "matched_terms": [
+        "instant payments"
+      ],
+      "published_at": "2026-05-17T00:00:00Z",
+      "quality_flags": [
+        "incidental_relevance",
+        "limited_support",
+        "secondary_terms_only",
+        "weak_keyword_match"
+      ],
+      "reason": "incidental fixture",
+      "relevance": "incidental",
+      "source_category": "national_central_bank",
+      "source_id": "rba",
+      "source_name": "Reserve Bank of Australia",
+      "title": "incidental_rba title",
+      "url": "https://example.com/incidental_rba"
+    }
+  ],
+  "generated_at": "2026-05-19T00:00:00Z",
+  "limitations": [
+    "This alert reports public-document convergence only.",
+    "It does not infer intent, coordination, causation, or future events."
+  ],
+  "scenario_id": "cbdc_payment_resilience",
+  "scenario_name": "Cross-border CBDC and payment-system resilience convergence",
+  "source_categories_active": 3,
+  "summary": "Public institutional activity related to CBDC and payment-system resilience is elevated across the classified source set.",
+  "warnings": [
+    "Baseline model is provisional.",
+    "Market-price module is disabled.",
+    "Narrative interpretation is disabled."
+  ],
+  "window_days": 30
+}

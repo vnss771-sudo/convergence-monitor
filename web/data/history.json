@@ -1,0 +1,8 @@
+[
+  { "date": "2026-04-14", "convergence_score": 4.2, "confidence": "low" },
+  { "date": "2026-04-21", "convergence_score": 5.1, "confidence": "low" },
+  { "date": "2026-04-28", "convergence_score": 5.8, "confidence": "medium" },
+  { "date": "2026-05-05", "convergence_score": 6.4, "confidence": "medium" },
+  { "date": "2026-05-12", "convergence_score": 7.0, "confidence": "medium" },
+  { "date": "2026-05-19", "convergence_score": 7.5, "confidence": "medium" }
+]

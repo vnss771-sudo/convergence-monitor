@@ -1,0 +1,100 @@
+name: Dashboard refresh
+
+on:
+  schedule:
+    # Nightly, offset from other scheduled jobs.
+    - cron: "23 3 * * *"
+  workflow_dispatch:
+
+# Least privilege: only the write needed to commit refreshed web/data back.
+permissions:
+  contents: write
+
+concurrency:
+  group: dashboard-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    name: Refresh dashboard data
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev]' -c constraints.txt
+
+      - name: Ingest live sources
+        # Live fetching may fail; do not fail the run on a flaky source.
+        continue-on-error: true
+        run: |
+          python -m app.cli ingest --source all --limit 10 || true
+
+      - name: Classify, score, alert
+        run: |
+          python -m app.cli classify --scenario cbdc_payment_resilience
+          python -m app.cli score --scenario cbdc_payment_resilience --window 30d
+          python -m app.cli alert --scenario cbdc_payment_resilience --window 30d --json
+
+      - name: Copy alert into web/data and append history point
+        run: |
+          python - <<'PY'
+          import json
+          import shutil
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          src = Path("data/processed/cbdc_payment_resilience_alert.json")
+          web_alert = Path("web/data/alert.json")
+          history_path = Path("web/data/history.json")
+
+          # Refresh the alert card the page renders.
+          shutil.copyfile(src, web_alert)
+
+          alert = json.loads(src.read_text(encoding="utf-8"))
+          today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+          point = {
+              "date": today,
+              "convergence_score": alert.get("convergence_score"),
+              "confidence": alert.get("confidence"),
+          }
+
+          if history_path.exists():
+              history = json.loads(history_path.read_text(encoding="utf-8"))
+              if not isinstance(history, list):
+                  history = []
+          else:
+              history = []
+
+          # One point per day: replace today's entry if it already exists.
+          history = [p for p in history if isinstance(p, dict) and p.get("date") != today]
+          history.append(point)
+
+          history_path.write_text(
+              json.dumps(history, indent=2) + "\n", encoding="utf-8"
+          )
+          print(f"Appended history point: {point}")
+          PY
+
+      - name: Commit refreshed web/data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add web/data/alert.json web/data/history.json
+          if git diff --cached --quiet; then
+            echo "No dashboard changes to commit."
+          else
+            git commit -m "chore(dashboard): refresh web/data [skip ci]"
+            git push
+          fi

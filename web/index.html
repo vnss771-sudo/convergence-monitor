@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Convergence Monitor — Dashboard</title>
+  <meta
+    name="description"
+    content="Static dashboard reporting observable public-document convergence for the cbdc_payment_resilience scenario."
+  />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="wrap">
+      <p class="kicker">Convergence Monitor</p>
+      <h1 id="scenario-name">Convergence Monitor</h1>
+      <p class="lede" id="scenario-sub">
+        Observable public-document convergence from public records. This dashboard
+        reports only what public documents observably show. It does not infer
+        intent, coordination, causation, or future events.
+      </p>
+    </div>
+  </header>
+
+  <div class="wrap banner-wrap">
+    <p class="provisional-banner" role="status">
+      <strong>Provisional</strong> — methodology not yet calibrated. The score
+      weights are not yet validated; treat every number as indicative, not
+      authoritative.
+    </p>
+  </div>
+
+  <main id="main" class="wrap" tabindex="-1">
+    <!-- Load / error states -->
+    <p id="status-line" class="status-line" role="status" aria-live="polite">
+      Loading alert data…
+    </p>
+
+    <div id="dashboard" hidden>
+      <!-- Score + confidence + summary -->
+      <section class="panel" aria-labelledby="score-heading">
+        <h2 id="score-heading">Convergence score</h2>
+        <div class="score-grid">
+          <div class="score-gauge" aria-hidden="true">
+            <svg viewBox="0 0 120 120" width="120" height="120" role="img"
+                 aria-label="Convergence score gauge">
+              <circle class="gauge-track" cx="60" cy="60" r="52" />
+              <circle id="gauge-value" class="gauge-value" cx="60" cy="60" r="52" />
+            </svg>
+            <div class="gauge-center">
+              <span id="score-number" class="score-number">—</span>
+              <span class="score-scale">/ 10</span>
+            </div>
+          </div>
+
+          <div class="score-meta">
+            <p class="score-line">
+              <span id="score-band" class="band">—</span>
+              <span class="band-label">band</span>
+            </p>
+            <p class="score-line">
+              <span id="confidence-badge" class="badge">—</span>
+              <span class="band-label">confidence</span>
+            </p>
+            <dl class="score-facts">
+              <div><dt>Documents</dt><dd id="document-count">—</dd></div>
+              <div><dt>Active source categories</dt><dd id="categories-active">—</dd></div>
+              <div><dt>Window</dt><dd id="window-days">—</dd></div>
+              <div><dt>Generated</dt><dd id="generated-at">—</dd></div>
+            </dl>
+          </div>
+        </div>
+        <p id="summary" class="summary">—</p>
+      </section>
+
+      <!-- Sparkline -->
+      <section class="panel" aria-labelledby="trend-heading">
+        <h2 id="trend-heading">Score over time</h2>
+        <p class="muted">Seed data — see <code>web/README.md</code>. Range 0–10.</p>
+        <div id="sparkline" class="sparkline" role="img"
+             aria-label="Convergence score trend over time"></div>
+        <p id="sparkline-empty" class="muted" hidden>No history data available.</p>
+      </section>
+
+      <!-- Evidence table -->
+      <section class="panel" aria-labelledby="evidence-heading">
+        <h2 id="evidence-heading">Ranked evidence</h2>
+        <p class="muted">
+          The exact public documents behind this result, in ranked order.
+        </p>
+        <div class="table-scroll">
+          <table class="evidence-table">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Title</th>
+                <th scope="col">Source</th>
+                <th scope="col">Relevance</th>
+                <th scope="col">Matched terms</th>
+                <th scope="col">Published</th>
+                <th scope="col">Link</th>
+              </tr>
+            </thead>
+            <tbody id="evidence-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Warnings + limitations (verbatim) -->
+      <div class="honesty-grid">
+        <section class="panel" aria-labelledby="warnings-heading">
+          <h2 id="warnings-heading">Warnings</h2>
+          <ul id="warnings-list" class="honesty-list"></ul>
+        </section>
+        <section class="panel" aria-labelledby="limitations-heading">
+          <h2 id="limitations-heading">Limitations</h2>
+          <ul id="limitations-list" class="honesty-list"></ul>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>
+        Static, deterministic dashboard. Data loaded from
+        <code>./data/alert.json</code> and <code>./data/history.json</code>.
+        No tracking, no external dependencies.
+      </p>
+    </div>
+  </footer>
+
+  <script src="./app.js" defer></script>
+</body>
+</html>
