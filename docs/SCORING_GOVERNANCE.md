@@ -11,6 +11,8 @@ The score is a deterministic evidence-convergence indicator. It is not a predict
 - score-component rationale
 - effect on false-positive fixtures
 - alert-schema compatibility review
+- for weight changes: a regenerated `tests/eval/weight_calibration_report.md` and an
+  updated `tests/eval/classifier_report.json`, justifying the chosen vector
 
 ## Required score report fields
 
@@ -25,11 +27,16 @@ The score is a deterministic evidence-convergence indicator. It is not a predict
 
 ## Score calibration roadmap
 
-1. Add static calibration fixtures.
-2. Add expected component-level outputs.
-3. Add adversarial false-positive fixtures.
-4. Add scenario-specific acceptance thresholds.
-5. Add snapshot tests for generated alert JSON.
+1. ✅ Externalize weights into `app/scoring/weights.py` (`ScoringWeights`), so they
+   are auditable data and `score_documents` can be evaluated under alternatives.
+2. ✅ Add a labeled evaluation set (`tests/eval/labeled_documents.jsonl`, with
+   adversarial cases) and measure classifier precision/recall with CI-enforced floors.
+3. ✅ Add a deterministic weight-calibration harness (`tools/calibrate_weights.py`)
+   that ranks weight vectors by window separation + monotonicity (advisory).
+4. Build `labeled_windows.jsonl` (expert ordinal band per real document set) to turn
+   the sensitivity tool into true calibration against human judgment.
+5. Add an advisory semantic/LLM relevance second stage over the keyword floor to
+   close the measured recall gap — never overriding the deterministic score.
 
 ## Change log
 
