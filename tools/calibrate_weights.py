@@ -20,11 +20,14 @@ Usage:
 
 from __future__ import annotations
 
+import hashlib
 import itertools
+import json
 from dataclasses import replace
 from pathlib import Path
 
-from app.models import ClassifiedDocumentRecord, load_configs
+from app.classification.keyword_matcher import classify_document
+from app.models import ClassifiedDocumentRecord, DocumentRecord, load_configs
 from app.scoring.convergence import score_documents
 from app.scoring.weights import DEFAULT_WEIGHTS, ScoringWeights
 
@@ -87,13 +90,70 @@ def _score(weights: ScoringWeights, docs: list[ClassifiedDocumentRecord]) -> flo
     ).convergence_score
 
 
-def _evaluate(weights: ScoringWeights) -> dict:
+def _band(score: float) -> str:
+    if score >= 7.0:
+        return "high"
+    if score >= 3.0:
+        return "medium"
+    return "low"
+
+
+def _load_classified_windows() -> list[tuple[str, list[ClassifiedDocumentRecord]]]:
+    """Pre-classify each labeled window once (classification is weight-independent)."""
+    bundle = load_configs(ROOT / "config")
+    scenario = bundle.get_scenario(SCENARIO_ID)
+    path = ROOT / "tests/eval/labeled_windows.jsonl"
+    if not path.exists():
+        return []
+    windows = []
+    with path.open(encoding="utf-8") as handle:
+        for line in handle:
+            if not line.strip():
+                continue
+            w = json.loads(line)
+            classified = []
+            for i, doc in enumerate(w["documents"]):
+                key = f"{w['id']}:{i}:{doc['title']}:{doc['summary']}"
+                record = DocumentRecord(
+                    document_id=f"{w['id']}-{i}",
+                    source_id=doc["source_id"],
+                    source_name=doc["source_id"].upper(),
+                    source_category=doc["source_category"],
+                    title=doc["title"],
+                    url=f"https://example.org/{w['id']}/{i}",
+                    published_at="2026-05-19T00:00:00Z",
+                    summary=doc["summary"],
+                    content_hash=hashlib.sha256(key.encode("utf-8")).hexdigest(),
+                    ingested_at="2026-05-19T00:00:00Z",
+                    raw={},
+                )
+                classified.append(classify_document(record, scenario))
+            windows.append((w["expected_band"], classified))
+    return windows
+
+
+def _window_agreement(weights: ScoringWeights, windows: list) -> float:
+    if not windows:
+        return 0.0
+    agree = sum(
+        _band(_score(weights, docs)) == expected for expected, docs in windows
+    )
+    return round(agree / len(windows), 3)
+
+
+def _evaluate(weights: ScoringWeights, windows: list) -> dict:
     high = _score(weights, _window(5, 3))      # many central docs, broad agreement
     low = _score(weights, _window(1, 1))       # a single isolated central doc
     separation = round(high - low, 2)
     ramp = [_score(weights, _window(n, 3)) for n in (1, 2, 3, 4, 5)]
     monotonic = all(b >= a for a, b in zip(ramp, ramp[1:]))
-    return {"high": high, "low": low, "separation": separation, "monotonic": monotonic}
+    return {
+        "high": high,
+        "low": low,
+        "separation": separation,
+        "monotonic": monotonic,
+        "agreement": _window_agreement(weights, windows),
+    }
 
 
 def _vectors() -> list[tuple[ScoringWeights, bool]]:
@@ -107,44 +167,53 @@ def _vectors() -> list[tuple[ScoringWeights, bool]]:
 
 
 def main() -> None:
+    windows = _load_classified_windows()
     rows = []
     for weights, is_default in _vectors():
-        result = _evaluate(weights)
+        result = _evaluate(weights, windows)
         rows.append((weights, is_default, result))
 
-    # Rank monotonic vectors by separation (descending), then deterministically.
-    rows.sort(key=lambda r: (not r[2]["monotonic"], -r[2]["separation"]))
+    # Rank by real-window agreement first, then synthetic separation, then determinism.
+    rows.sort(key=lambda r: (not r[2]["monotonic"], -r[2]["agreement"], -r[2]["separation"]))
 
     lines = [
         "# Weight calibration report",
         "",
         "Deterministic grid search over `ScoringWeights`. This report is advisory:",
         "weights change only via a governed PR (see docs/SCORING_GOVERNANCE.md).",
-        "Objective: maximise separation between a high- and low-activity window while",
-        "staying monotonic in corroborating central documents.",
+        "Objective: maximise band agreement with the expert-labeled windows",
+        "(`tests/eval/labeled_windows.jsonl`), then separation between a high- and",
+        "low-activity window, staying monotonic in corroborating central documents.",
         "",
-        "| rank | central/doc | incid/doc | trust×  | div(2) | separation | monotonic | default |",
-        "|------|-------------|-----------|---------|--------|------------|-----------|---------|",
+        f"Windows evaluated: {len(windows)}.",
+        "",
+        "| rank | central/doc | incid/doc | trust×  | div(2) | agreement | separation | monotonic | default |",
+        "|------|-------------|-----------|---------|--------|-----------|------------|-----------|---------|",
     ]
     for rank, (w, is_default, res) in enumerate(rows[:15], start=1):
         lines.append(
             f"| {rank} | {w.central_per_doc} | {w.incidental_per_doc} | "
-            f"{w.trust_multiplier} | {w.diversity_two} | {res['separation']} | "
+            f"{w.trust_multiplier} | {w.diversity_two} | {res['agreement']} | {res['separation']} | "
             f"{'yes' if res['monotonic'] else 'NO'} | {'★' if is_default else ''} |"
         )
     default_rank = next(i for i, r in enumerate(rows, 1) if r[1])
+    default_res = next(r[2] for r in rows if r[1])
     lines += [
         "",
-        f"Default vector rank: **{default_rank} / {len(rows)}**.",
+        f"Default vector rank: **{default_rank} / {len(rows)}** "
+        f"(agreement {default_res['agreement']}, separation {default_res['separation']}).",
         "",
-        "Note: windows here are synthetic representatives, not human-labeled ordinal",
-        "targets. Building `labeled_windows.jsonl` (expert band per real document set)",
-        "is the next step to turn this from a sensitivity tool into true calibration.",
+        "Agreement is exact-band match against the expert windows. It is below 1.0",
+        "because the model is generous to thin/incidental evidence and the keyword",
+        "classifier under-counts paraphrased windows — the documented calibration",
+        "backlog (tests/eval/README.md). If a grid vector materially beats the default",
+        "on agreement without losing monotonicity, that is the signal to adopt it via a",
+        "governed scoring change.",
         "",
     ]
     out_path = ROOT / "tests/eval/weight_calibration_report.md"
     out_path.write_text("\n".join(lines), encoding="utf-8")
-    print(f"wrote {out_path.relative_to(ROOT)} ({len(rows)} vectors evaluated)")
+    print(f"wrote {out_path.relative_to(ROOT)} ({len(rows)} vectors, {len(windows)} windows)")
 
 
 if __name__ == "__main__":

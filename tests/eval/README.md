@@ -17,9 +17,33 @@ reproducible** quality with floors that fail CI on regression.
   and asserts per-class **floor thresholds** (honest current numbers, not targets).
 - `classifier_report.json` — the committed measurement (regenerated deterministically
   by the test, so a classifier/term change shows a visible diff).
+- `labeled_windows.jsonl` — expert-labeled *windows*: each is a set of documents
+  with an ordinal `expected_band` (low/medium/high) for how much convergence the
+  set represents. `test_window_calibration.py` scores each window and measures
+  exact-band agreement against the expert label (regression-guarded floor),
+  writing `window_calibration_report.json`.
 - `weight_calibration_report.md` — output of `tools/calibrate_weights.py`, a
-  deterministic grid search over `ScoringWeights` ranked by window separation +
-  monotonicity. Advisory only; weights change via a governed PR.
+  deterministic grid search over `ScoringWeights` ranked by **window agreement**
+  (then separation + monotonicity) against the labeled windows. Advisory only;
+  weights change via a governed PR.
+
+## Calibration backlog (what the windows surfaced)
+
+Current window band-agreement is **0.7** — and the grid search shows the default
+weights already rank #1, i.e. these disagreements are **not** fixable by tuning the
+weight knobs:
+
+1. **The model is generous to thin/incidental evidence.** A single central document
+   scores ~3.6 (medium) and incidental-only evidence ~4.7 (medium), because the
+   diversity/trust/recency components give a floor even without corroboration.
+   "Convergence" arguably should require corroboration (≥2 contributing documents,
+   ≥1 of them central) to leave the low band. This is a **governed scoring change**:
+   it trades against the cycle-2 "components sum to the score" invariant (a
+   corroboration cap makes the components exceed the score in capped cases), so it
+   needs deliberate design + before/after fixtures, not a reflexive cap.
+2. **Paraphrase under-counting** (`w_hard_paraphrase`): an expert-high window scores
+   low because the keyword classifier misses paraphrases — the recall ceiling an
+   advisory semantic/LLM stage (over the deterministic floor) would close.
 
 ## Current measured quality (seed set)
 

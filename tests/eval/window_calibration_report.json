@@ -1,0 +1,75 @@
+{
+  "agreement": 0.7,
+  "windows": [
+    {
+      "agree": true,
+      "expected_band": "high",
+      "id": "w_high_broad",
+      "produced_band": "high",
+      "score": 10.0
+    },
+    {
+      "agree": true,
+      "expected_band": "high",
+      "id": "w_high_six",
+      "produced_band": "high",
+      "score": 10.0
+    },
+    {
+      "agree": true,
+      "expected_band": "medium",
+      "id": "w_med_two_cat",
+      "produced_band": "medium",
+      "score": 6.4
+    },
+    {
+      "agree": true,
+      "expected_band": "medium",
+      "id": "w_med_single_cat",
+      "produced_band": "medium",
+      "score": 5.7
+    },
+    {
+      "agree": true,
+      "expected_band": "medium",
+      "id": "w_med_mixed",
+      "produced_band": "medium",
+      "score": 6.7
+    },
+    {
+      "agree": false,
+      "expected_band": "low",
+      "id": "w_low_single",
+      "produced_band": "medium",
+      "score": 3.6
+    },
+    {
+      "agree": false,
+      "expected_band": "low",
+      "id": "w_low_incidental",
+      "produced_band": "medium",
+      "score": 4.7
+    },
+    {
+      "agree": true,
+      "expected_band": "low",
+      "id": "w_low_noise",
+      "produced_band": "low",
+      "score": 0.0
+    },
+    {
+      "agree": true,
+      "expected_band": "low",
+      "id": "w_low_empty",
+      "produced_band": "low",
+      "score": 0.0
+    },
+    {
+      "agree": false,
+      "expected_band": "high",
+      "id": "w_hard_paraphrase",
+      "produced_band": "low",
+      "score": 0.0
+    }
+  ]
+}

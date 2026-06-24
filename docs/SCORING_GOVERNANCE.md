@@ -33,9 +33,17 @@ The score is a deterministic evidence-convergence indicator. It is not a predict
    adversarial cases) and measure classifier precision/recall with CI-enforced floors.
 3. ✅ Add a deterministic weight-calibration harness (`tools/calibrate_weights.py`)
    that ranks weight vectors by window separation + monotonicity (advisory).
-4. Build `labeled_windows.jsonl` (expert ordinal band per real document set) to turn
-   the sensitivity tool into true calibration against human judgment.
-5. Add an advisory semantic/LLM relevance second stage over the keyword floor to
+4. ✅ Build `labeled_windows.jsonl` (expert ordinal band per real document set) and
+   measure band agreement (`tests/eval/test_window_calibration.py`); the calibration
+   tool now ranks weight vectors by agreement against these windows.
+5. Address the **thin-evidence over-scoring** the windows surfaced: a single central
+   document (~3.6) or incidental-only evidence (~4.7) currently reads as "medium".
+   Convergence should require corroboration (≥2 contributors, ≥1 central) to leave
+   the low band. This is a governed scoring change — it trades against the
+   "components sum to the score" invariant (a corroboration cap makes components
+   exceed the score when capped), so it requires deliberate design and before/after
+   fixtures. Not weight-tunable (the grid search shows the default already ranks #1).
+6. Add an advisory semantic/LLM relevance second stage over the keyword floor to
    close the measured recall gap — never overriding the deterministic score.
 
 ## Change log
