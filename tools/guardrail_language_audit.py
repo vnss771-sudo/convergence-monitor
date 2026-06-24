@@ -46,6 +46,10 @@ EXCLUDED_TOP_LEVEL_DIRS = {
 EXCLUDED_PATH_PREFIXES = (
     ("docs", "history"),
     ("docs", "reports"),
+    # Generated pipeline output committed for the dashboard; the alert JSON echoes
+    # the product's own audited disclaimer ("does not infer intent ...") which the
+    # rule would otherwise re-flag.
+    ("web", "data"),
 )
 
 EXCLUDED_RELATIVE_PATHS = {
