@@ -358,3 +358,61 @@ def test_confidence_band_edges(docs: int, categories: int, expected: str) -> Non
         )
         == expected
     )
+
+
+# --- Cycle 6: corroboration gate -------------------------------------------------
+
+
+def test_single_central_document_stays_low_band() -> None:
+    """Convergence requires corroboration: one document cannot read as medium/high."""
+    bundle = load_configs(PROJECT_ROOT / "config")
+    score = score_documents(
+        [_central("solo", "bis", "central_bank_coordination", make_hash("a"))],
+        bundle=bundle,
+        scenario_id="cbdc_payment_resilience",
+        window_days=30,
+    )
+    assert score.convergence_score < 3.0  # low band
+
+
+def test_incidental_only_evidence_stays_low_band() -> None:
+    bundle = load_configs(PROJECT_ROOT / "config")
+    docs = [
+        make_classified(
+            document_id="inc1", source_id="bis", source_name="BIS",
+            source_category="central_bank_coordination", relevance="incidental",
+            content_hash=make_hash("a"),
+        ),
+        make_classified(
+            document_id="inc2", source_id="rba", source_name="RBA",
+            source_category="national_central_bank", relevance="incidental",
+            content_hash=make_hash("b"),
+        ),
+    ]
+    score = score_documents(
+        docs, bundle=bundle, scenario_id="cbdc_payment_resilience", window_days=30
+    )
+    assert score.central_documents == 0
+    assert score.convergence_score < 3.0  # no central evidence -> no corroboration
+
+
+def test_two_central_documents_are_not_gated() -> None:
+    """At/above the corroboration target, diversity/trust/recency count in full."""
+    bundle = load_configs(PROJECT_ROOT / "config")
+    docs = [
+        _central("d1", "bis", "central_bank_coordination", make_hash("a")),
+        _central("d2", "imf", "international_finance", make_hash("b")),
+    ]
+    score = score_documents(
+        docs, bundle=bundle, scenario_id="cbdc_payment_resilience", window_days=30
+    )
+    # Two central docs across two categories clears the low band.
+    assert score.convergence_score >= 3.0
+    # Additivity still holds.
+    c = score.score_components
+    expected = round(
+        min(10.0, c.central_document_score + c.source_diversity_score
+            + c.trust_weight_score + c.recency_score - c.duplication_penalty),
+        1,
+    )
+    assert score.convergence_score == expected

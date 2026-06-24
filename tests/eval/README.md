@@ -29,21 +29,18 @@ reproducible** quality with floors that fail CI on regression.
 
 ## Calibration backlog (what the windows surfaced)
 
-Current window band-agreement is **0.7** — and the grid search shows the default
-weights already rank #1, i.e. these disagreements are **not** fixable by tuning the
-weight knobs:
+Current window band-agreement is **0.9**.
 
-1. **The model is generous to thin/incidental evidence.** A single central document
-   scores ~3.6 (medium) and incidental-only evidence ~4.7 (medium), because the
-   diversity/trust/recency components give a floor even without corroboration.
-   "Convergence" arguably should require corroboration (≥2 contributing documents,
-   ≥1 of them central) to leave the low band. This is a **governed scoring change**:
-   it trades against the cycle-2 "components sum to the score" invariant (a
-   corroboration cap makes the components exceed the score in capped cases), so it
-   needs deliberate design + before/after fixtures, not a reflexive cap.
-2. **Paraphrase under-counting** (`w_hard_paraphrase`): an expert-high window scores
-   low because the keyword classifier misses paraphrases — the recall ceiling an
-   advisory semantic/LLM stage (over the deterministic floor) would close.
+1. ✅ **Thin/incidental over-scoring — fixed.** A single central document used to
+   score ~3.6 (medium) and incidental-only ~4.7 (medium). A corroboration factor
+   (`min(1, central/2)` folded into the diversity/trust/recency components — see
+   `docs/SCORING_GOVERNANCE.md`) now sends both to the low band, while leaving sets
+   with ≥2 central documents unchanged and preserving the components-sum-to-score
+   invariant.
+2. **Paraphrase under-counting** (`w_hard_paraphrase`): an expert-high window still
+   scores low because the keyword classifier misses paraphrases — the recall ceiling
+   an advisory semantic/LLM stage (over the deterministic floor) would close. This
+   is the one remaining window disagreement.
 
 ## Current measured quality (seed set)
 
