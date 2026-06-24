@@ -1,5 +1,5 @@
 {
-  "agreement": 0.7,
+  "agreement": 0.9,
   "windows": [
     {
       "agree": true,
@@ -34,21 +34,21 @@
       "expected_band": "medium",
       "id": "w_med_mixed",
       "produced_band": "medium",
-      "score": 6.7
+      "score": 4.0
     },
     {
-      "agree": false,
+      "agree": true,
       "expected_band": "low",
       "id": "w_low_single",
-      "produced_band": "medium",
-      "score": 3.6
+      "produced_band": "low",
+      "score": 2.3
     },
     {
-      "agree": false,
+      "agree": true,
       "expected_band": "low",
       "id": "w_low_incidental",
-      "produced_band": "medium",
-      "score": 4.7
+      "produced_band": "low",
+      "score": 0.4
     },
     {
       "agree": true,

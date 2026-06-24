@@ -36,13 +36,9 @@ The score is a deterministic evidence-convergence indicator. It is not a predict
 4. ✅ Build `labeled_windows.jsonl` (expert ordinal band per real document set) and
    measure band agreement (`tests/eval/test_window_calibration.py`); the calibration
    tool now ranks weight vectors by agreement against these windows.
-5. Address the **thin-evidence over-scoring** the windows surfaced: a single central
-   document (~3.6) or incidental-only evidence (~4.7) currently reads as "medium".
-   Convergence should require corroboration (≥2 contributors, ≥1 central) to leave
-   the low band. This is a governed scoring change — it trades against the
-   "components sum to the score" invariant (a corroboration cap makes components
-   exceed the score when capped), so it requires deliberate design and before/after
-   fixtures. Not weight-tunable (the grid search shows the default already ranks #1).
+5. ✅ Address the **thin-evidence over-scoring** the windows surfaced (see change log
+   below). Implemented as a corroboration factor folded into the components — which
+   preserves the components-sum-to-score invariant — rather than a post-hoc cap.
 6. Add an advisory semantic/LLM relevance second stage over the keyword floor to
    close the measured recall gap — never overriding the deterministic score.
 
@@ -106,3 +102,26 @@ descriptive stats only — until there are at least `MIN_REFERENCE_BUCKETS` dail
 buckets spanning at least `REFERENCE_GATE_DAYS`. This removes the cadence-gaming and
 self-reference of the previous design. No schema change (the directional fields
 were already nullable).
+
+### Corroboration gate (thin-evidence over-scoring)
+
+**Problem (surfaced by window calibration).** Diversity/trust/recency credit
+accrued even without corroborating central evidence, so a single central document
+scored ~3.6 and incidental-only evidence ~4.7 — both reading as "medium" when
+"convergence" should require corroboration. Expert-window band agreement was 0.7.
+
+**Change.** A corroboration factor `min(1, unique_central_count /
+corroboration_central_target)` (target = 2) is folded into the diversity, trust,
+and recency component bases before scaling. Central evidence is not gated (it *is*
+the corroboration) and the duplicate penalty is never softened. This was chosen over
+a post-hoc score cap specifically so the components-sum-to-score invariant still
+holds (the gate changes component *values*, which still sum to the score).
+
+**Before/after.** Single central doc 3.6 → **2.3** (low); incidental-only 4.7 →
+**0.4** (low). Sets with ≥2 central documents are unchanged, so the golden alert
+(7.5) and the scoring fixture (6.8) are unaffected. Expert-window band agreement
+0.7 → **0.9** (the only remaining disagreement is the paraphrased window — the
+keyword recall ceiling, addressed later by an advisory semantic stage).
+
+**Effect on false-positive fixtures / alert schema.** False-positive sets stay
+low; no schema change; the additivity invariant and property tests still pass.

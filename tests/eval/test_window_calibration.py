@@ -27,18 +27,13 @@ EVAL_DIR = Path(__file__).resolve().parent
 SCENARIO_ID = "cbdc_payment_resilience"
 
 # Honest agreement floor: the measured exact-band agreement of the current
-# deterministic model against the expert windows. It is 0.7, NOT higher, because
-# the harness surfaced three genuine disagreements that are the calibration
-# backlog (see tests/eval/README.md), not bugs to paper over:
-#   - w_low_single / w_low_incidental: the model is generous to thin/incidental
-#     evidence (1 central doc or incidental-only reads as low-medium, not low) —
-#     "convergence" arguably should require corroboration; addressing it is a
-#     governed scoring change (it trades against the components-sum-to-score
-#     invariant, so it needs deliberate design, not a reflexive cap).
-#   - w_hard_paraphrase: expert-high but paraphrased, so the keyword classifier
-#     under-counts it — the recall ceiling an advisory semantic stage would close.
-# This floor is a regression guard: agreement must not drop below today's level.
-AGREEMENT_FLOOR = 0.70
+# deterministic model against the expert windows. The corroboration gate (a
+# governed scoring change) raised this from 0.7 to 0.9 by fixing the thin/
+# incidental over-scoring (w_low_single, w_low_incidental now score low). The one
+# remaining disagreement is w_hard_paraphrase — expert-high but paraphrased, so the
+# keyword classifier under-counts it — the recall ceiling an advisory semantic stage
+# would close. This floor is a regression guard: agreement must not drop below it.
+AGREEMENT_FLOOR = 0.90
 
 
 def _band(score: float) -> str:

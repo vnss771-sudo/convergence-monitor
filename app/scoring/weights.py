@@ -44,5 +44,12 @@ class ScoringWeights:
     penalty_per_duplicate: float = 0.5
     penalty_cap: float = 2.0
 
+    # Corroboration: diversity/trust/recency credit only counts in proportion to how
+    # much central evidence corroborates it. Convergence from a single document (or
+    # incidental-only evidence) should not read as medium/high. The factor is
+    # min(1, unique_central_count / corroboration_central_target), applied to the
+    # diversity, trust, and recency component bases (not central, not the penalty).
+    corroboration_central_target: float = 2.0
+
 
 DEFAULT_WEIGHTS = ScoringWeights()

@@ -265,6 +265,22 @@ def score_documents(
     else:
         recency_basis = 0.0
 
+    # Corroboration gate: diversity/trust/recency are credits for *corroborated*
+    # convergence, so they only count in proportion to the central evidence backing
+    # them. Without this, a single central document — or incidental-only evidence —
+    # accrues a diversity/trust/recency floor and reads as medium. See
+    # docs/SCORING_GOVERNANCE.md. Central evidence itself is not gated (it is the
+    # corroboration), and the duplicate penalty is never softened. Sets with >= the
+    # target number of central documents (default 2) are unaffected.
+    corroboration = (
+        min(1.0, unique_central_count / weights.corroboration_central_target)
+        if weights.corroboration_central_target > 0
+        else 1.0
+    )
+    diversity_basis *= corroboration
+    trust_basis *= corroboration
+    recency_basis *= corroboration
+
     duplicate_count = max(0, len(contributing_documents) - len(unique_contributors))
     penalty_basis = min(weights.penalty_cap, duplicate_count * weights.penalty_per_duplicate)
 
