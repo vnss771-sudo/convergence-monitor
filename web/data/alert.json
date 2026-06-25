@@ -1,79 +1,56 @@
 {
-  "confidence": "medium",
-  "convergence_score": 7.5,
-  "document_count": 3,
+  "confidence": "low",
+  "convergence_score": 0.6,
+  "document_count": 20,
   "evidence": [
-    {
-      "matched_terms": [
-        "cbdc",
-        "cross-border payments",
-        "settlement infrastructure",
-        "financial market infrastructure"
-      ],
-      "published_at": "2026-05-19T00:00:00Z",
-      "quality_flags": [
-        "central_relevance",
-        "primary_terms_present",
-        "multiple_primary_terms"
-      ],
-      "reason": "central fixture",
-      "relevance": "central",
-      "source_category": "central_bank_coordination",
-      "source_id": "bis",
-      "source_name": "Bank for International Settlements",
-      "title": "central_bis title",
-      "url": "https://example.com/central_bis"
-    },
-    {
-      "matched_terms": [
-        "cbdc",
-        "cross-border payments",
-        "settlement infrastructure",
-        "financial market infrastructure"
-      ],
-      "published_at": "2026-05-18T00:00:00Z",
-      "quality_flags": [
-        "central_relevance",
-        "primary_terms_present",
-        "multiple_primary_terms"
-      ],
-      "reason": "central fixture",
-      "relevance": "central",
-      "source_category": "international_finance",
-      "source_id": "imf",
-      "source_name": "International Monetary Fund",
-      "title": "central_imf title",
-      "url": "https://example.com/central_imf"
-    },
     {
       "matched_terms": [
         "instant payments"
       ],
-      "published_at": "2026-05-17T00:00:00Z",
+      "published_at": "2026-06-24T08:00:00Z",
       "quality_flags": [
         "incidental_relevance",
         "limited_support",
         "secondary_terms_only",
         "weak_keyword_match"
       ],
-      "reason": "incidental fixture",
+      "reason": "The scenario is mentioned incidentally because it matched 1 configured scenario term(s), below the central relevance threshold.",
       "relevance": "incidental",
       "source_category": "national_central_bank",
-      "source_id": "rba",
-      "source_name": "Reserve Bank of Australia",
-      "title": "incidental_rba title",
-      "url": "https://example.com/incidental_rba"
+      "source_id": "ecb",
+      "source_name": "European Central Bank",
+      "title": "Iceland joins TIPS for instant payments",
+      "url": "https://www.ecb.europa.eu//press/pr/date/2026/html/ecb.pr260624_1~ce8e85127f.en.html"
+    },
+    {
+      "matched_terms": [
+        "central bank money"
+      ],
+      "published_at": "2026-06-19T10:15:00Z",
+      "quality_flags": [
+        "incidental_relevance",
+        "limited_support",
+        "secondary_terms_only",
+        "weak_keyword_match"
+      ],
+      "reason": "The scenario is mentioned incidentally because it matched 1 configured scenario term(s), below the central relevance threshold.",
+      "relevance": "incidental",
+      "source_category": "national_central_bank",
+      "source_id": "ecb",
+      "source_name": "European Central Bank",
+      "title": "Piero Cipollone: The foundations of national sovereignty: the role of central bank money",
+      "url": "https://www.ecb.europa.eu//press/key/date/2026/html/ecb.sp260619~53145e5a0b.en.html"
     }
   ],
-  "generated_at": "2026-05-19T00:00:00Z",
+  "generated_at": "2026-06-24T08:00:00Z",
   "limitations": [
     "This alert reports public-document convergence only.",
     "It does not infer intent, coordination, causation, or future events."
   ],
   "scenario_id": "cbdc_payment_resilience",
   "scenario_name": "Cross-border CBDC and payment-system resilience convergence",
-  "source_categories_active": 3,
-  "summary": "Public institutional activity related to CBDC and payment-system resilience is elevated across the classified source set.",
+  "source_categories_active": 1,
+  "summary": "Public institutional activity related to CBDC and payment-system resilience is limited in the classified source set.",
   "warnings": [
     "Baseline model is provisional.",
     "Market-price module is disabled.",
