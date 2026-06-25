@@ -127,6 +127,7 @@ class DocumentRecord(BaseModel):
     interpretation belongs in this model.
     """
 
+    schema_version: str = Field(default="raw.v1")
     document_id: str = Field(min_length=1)
     source_id: str = Field(min_length=1)
     source_name: str = Field(min_length=1)
@@ -158,6 +159,7 @@ class ClassifiedDocumentRecord(BaseModel):
     assign convergence scores, confidence bands, or narrative interpretation.
     """
 
+    schema_version: str = Field(default="classified.v1")
     document_id: str = Field(min_length=1)
     source_id: str = Field(min_length=1)
     source_name: str = Field(min_length=1)
@@ -238,6 +240,7 @@ class ScenarioScoreRecord(BaseModel):
     deterministic convergence score.
     """
 
+    schema_version: str = Field(default="score.v1")
     status: Literal["ok"]
     scenario_id: str = Field(min_length=1)
     window_days: int = Field(ge=1)
@@ -281,6 +284,7 @@ class AlertRecord(BaseModel):
     future events.
     """
 
+    schema_version: str = Field(default="alert.v1")
     scenario_id: str = Field(min_length=1)
     scenario_name: str = Field(min_length=1)
     generated_at: str = Field(min_length=1)

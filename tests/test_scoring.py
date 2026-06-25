@@ -187,6 +187,7 @@ def test_score_json_output_shape_is_stable(tmp_path: Path) -> None:
     assert output_path == tmp_path / "cbdc_payment_resilience_score.json"
     payload = json.loads(output_path.read_text(encoding="utf-8"))
     assert set(payload) == {
+        "schema_version",
         "status",
         "scenario_id",
         "window_days",

@@ -4,6 +4,7 @@ import hashlib
 import html
 import json
 import re
+import time
 from datetime import UTC
 from pathlib import Path
 from typing import Any
@@ -12,11 +13,16 @@ from dateutil import parser as date_parser
 from pydantic import ValidationError
 
 from app.models import DocumentRecord, IngestionSaveResult, Source
-from app.persistence import utc_now_iso
+from app.persistence import utc_now_iso, write_jsonl_atomic
 
 # Upper bound on a single fetched feed payload (bytes). Feeds we monitor are well
 # under this; the cap protects against decompression bombs and runaway responses.
 MAX_RESPONSE_BYTES = 10 * 1024 * 1024
+
+# Retry settings for transient network errors. HTTP-level errors (4xx/5xx) are
+# not retried — they move immediately to the next candidate URL.
+_MAX_FETCH_RETRIES = 3
+_RETRY_BASE_DELAY_SECONDS = 1.0
 
 
 class IngestionError(RuntimeError):
@@ -189,25 +195,37 @@ def fetch_rss_payload(source: Source, timeout_seconds: float = 20.0) -> bytes:
     errors: list[str] = []
 
     for url in source_candidate_urls(source):
-        try:
-            response = httpx.get(url, timeout=timeout_seconds, follow_redirects=True)
-            response.raise_for_status()
-        except httpx.HTTPError as exc:
-            errors.append(f"{url}: {exc}")
-            continue
+        delay = _RETRY_BASE_DELAY_SECONDS
+        for attempt in range(1, _MAX_FETCH_RETRIES + 1):
+            try:
+                response = httpx.get(url, timeout=timeout_seconds, follow_redirects=True)
+                response.raise_for_status()
+            except httpx.HTTPStatusError as exc:
+                # HTTP-level error (4xx/5xx): don't retry, move to next URL.
+                errors.append(f"{url}: {exc}")
+                break
+            except httpx.HTTPError as exc:
+                # Transient network/timeout error: retry with exponential backoff.
+                if attempt == _MAX_FETCH_RETRIES:
+                    errors.append(f"{url}: {exc}")
+                    break
+                time.sleep(delay)
+                delay *= 2
+                continue
 
-        content = response.content
-        # Bound the payload we process and persist so a malicious or
-        # misbehaving feed (httpx auto-decompresses gzip/deflate) cannot
-        # exhaust memory or disk downstream.
-        if len(content) > MAX_RESPONSE_BYTES:
-            errors.append(f"{url}: response exceeded {MAX_RESPONSE_BYTES}-byte limit")
-            continue
+            content = response.content
+            # Bound the payload we process and persist so a malicious or
+            # misbehaving feed (httpx auto-decompresses gzip/deflate) cannot
+            # exhaust memory or disk downstream.
+            if len(content) > MAX_RESPONSE_BYTES:
+                errors.append(f"{url}: response exceeded {MAX_RESPONSE_BYTES}-byte limit")
+                break
 
-        if content:
-            return content
+            if content:
+                return content
 
-        errors.append(f"{url}: empty response")
+            errors.append(f"{url}: empty response")
+            break
 
     raise IngestionError(
         f"Failed to fetch RSS source '{source.id}' from all configured URLs: "
@@ -388,18 +406,14 @@ def save_documents_jsonl(
         existing_document_ids.add(document.document_id)
         existing_content_hashes.add(document.content_hash)
 
-    mode = "w" if replace else "a"
-    with output_path.open(mode, encoding="utf-8") as handle:
-        for document in to_save:
-            handle.write(
-                json.dumps(
-                    document.model_dump(mode="json"),
-                    sort_keys=True,
-                    ensure_ascii=False,
-                    separators=(",", ":"),
-                )
-                + "\n"
-            )
+    # Write all records (prior existing + new) atomically so a crash mid-write
+    # never leaves a partially-written or zero-byte JSONL file on disk.
+    all_records = ([] if replace else existing) + to_save
+    serialized = [
+        json.dumps(doc.model_dump(mode="json"), sort_keys=True, ensure_ascii=False, separators=(",", ":"))
+        for doc in all_records
+    ]
+    write_jsonl_atomic(output_path, serialized)
 
     return IngestionSaveResult(
         raw_path=str(output_path),

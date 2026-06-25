@@ -67,6 +67,33 @@ def read_json(path: Path | str) -> Any:
     return json.loads(Path(path).read_text(encoding="utf-8"))
 
 
+def write_jsonl_atomic(path: Path | str, lines: list[str]) -> Path:
+    """Atomically write pre-serialized JSON ``lines`` (one per record) to ``path``.
+
+    Creates parent directories as needed. Writes to a temporary file in the same
+    directory and ``os.replace``s it into place so readers never observe a partial
+    file. Each string in ``lines`` is written as-is followed by a newline.
+    """
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+    fd, tmp_name = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.", suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            for line in lines:
+                handle.write(line + "\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(tmp_name, path)
+    except BaseException:
+        try:
+            os.unlink(tmp_name)
+        except OSError:
+            pass
+        raise
+    return path
+
+
 def iter_jsonl(path: Path | str) -> Iterator[dict[str, Any]]:
     """Yield parsed objects from a JSONL file, skipping blank lines.
 

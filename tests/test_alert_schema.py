@@ -5,6 +5,7 @@ from app.alerts.generator import required_alert_fields
 
 def test_required_alert_schema_fields_are_stable() -> None:
     assert required_alert_fields() == [
+        "schema_version",
         "scenario_id",
         "scenario_name",
         "generated_at",
