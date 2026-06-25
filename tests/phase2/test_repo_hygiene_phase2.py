@@ -3,6 +3,8 @@ from __future__ import annotations
 import subprocess
 from pathlib import Path
 
+import pytest
+
 
 RUNTIME_PREFIXES = (
     "data/raw/",
@@ -19,12 +21,16 @@ ROOT_GENERATED_FILES = {
 
 
 def git_ls_files() -> list[str]:
-    result = subprocess.run(
-        ["git", "ls-files"],
-        check=True,
-        text=True,
-        stdout=subprocess.PIPE,
-    )
+    try:
+        result = subprocess.run(
+            ["git", "ls-files"],
+            check=True,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        pytest.skip("not running inside a git repository")
     return [line.strip() for line in result.stdout.splitlines() if line.strip()]
 
 

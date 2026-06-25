@@ -12,7 +12,7 @@ from pathlib import Path
 
 from pydantic import ValidationError
 
-from app.persistence import utc_now_iso
+from app.persistence import utc_now_iso, write_jsonl_atomic
 
 from app.models import ClassifiedDocumentRecord, DocumentRecord, Scenario
 
@@ -299,16 +299,9 @@ def save_classified_documents_jsonl(
     output_dir.mkdir(parents=True, exist_ok=True)
     output_path = output_dir / f"{scenario_id}_classified.jsonl"
 
-    with output_path.open("w", encoding="utf-8") as handle:
-        for document in classified_documents:
-            handle.write(
-                json.dumps(
-                    document.model_dump(mode="json"),
-                    sort_keys=True,
-                    ensure_ascii=False,
-                    separators=(",", ":"),
-                )
-                + "\n"
-            )
-
+    serialized = [
+        json.dumps(doc.model_dump(mode="json"), sort_keys=True, ensure_ascii=False, separators=(",", ":"))
+        for doc in classified_documents
+    ]
+    write_jsonl_atomic(output_path, serialized)
     return output_path

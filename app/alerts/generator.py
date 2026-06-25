@@ -25,8 +25,6 @@ from app.models import (
 )
 
 
-ALERT_SCHEMA_VERSION = "sprint-2-pr10"
-
 # Qualitative summary bands, aligned with the documented 0–10 convergence-score
 # bands (low 0.0–2.9, medium 3.0–6.9, high 7.0–10.0). Kept as named constants so
 # the summary wording stays in lockstep with the score bands.
@@ -34,6 +32,7 @@ MEDIUM_BAND_MIN = 3.0
 HIGH_BAND_MIN = 7.0
 
 REQUIRED_ALERT_FIELDS = [
+    "schema_version",
     "scenario_id",
     "scenario_name",
     "generated_at",

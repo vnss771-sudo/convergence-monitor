@@ -72,6 +72,7 @@
   ],
   "scenario_id": "cbdc_payment_resilience",
   "scenario_name": "Cross-border CBDC and payment-system resilience convergence",
+  "schema_version": "alert.v1",
   "source_categories_active": 3,
   "summary": "Public institutional activity related to CBDC and payment-system resilience is elevated across the classified source set.",
   "warnings": [

@@ -65,6 +65,7 @@ def test_normalize_entry_contains_required_fields() -> None:
 
     payload = document.model_dump()
     assert set(payload) == {
+        "schema_version",
         "document_id",
         "source_id",
         "source_name",

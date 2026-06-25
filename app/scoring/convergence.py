@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import re
 from collections.abc import Iterable
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from dateutil import parser as date_parser
@@ -61,7 +61,7 @@ def parse_document_datetime(value: str | None) -> datetime | None:
         return None
 
     if parsed.tzinfo is not None:
-        parsed = parsed.astimezone(tz=None).replace(tzinfo=None)
+        parsed = parsed.astimezone(UTC).replace(tzinfo=None)
     return parsed
 
 

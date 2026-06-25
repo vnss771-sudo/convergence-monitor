@@ -178,6 +178,7 @@ def test_load_raw_and_save_classified_documents_jsonl(tmp_path: Path) -> None:
 
     payload = json.loads(lines[0])
     assert set(payload) == {
+        "schema_version",
         "document_id",
         "source_id",
         "source_name",
