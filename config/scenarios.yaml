@@ -39,3 +39,76 @@ scenarios:
       central_min_primary_matches: 2
       central_min_total_matches: 4
       incidental_min_total_matches: 1
+
+  - id: financial_stability
+    name: Financial stability and systemic risk convergence
+    description: >
+      Detects elevated public institutional language around financial stability,
+      systemic risk, bank resilience, credit stress, liquidity conditions,
+      housing stress, and macro-prudential policy — relevant to ASX and
+      Australian macro monitoring.
+    primary_terms:
+      - financial stability
+      - systemic risk
+      - bank resilience
+      - credit stress
+      - liquidity stress
+      - macro-prudential
+      - macroprudential
+      - housing stress
+      - mortgage stress
+      - stress test
+    secondary_terms:
+      - capital adequacy
+      - non-performing loans
+      - credit tightening
+      - lending standards
+      - asset quality
+      - financial system
+      - prudential
+      - contagion
+      - interbank
+      - deleveraging
+      - private credit risk
+    exclusion_terms:
+      - stock tip
+      - trading signal
+      - investment recommendation
+    relevance_rules:
+      central_min_primary_matches: 1
+      central_min_total_matches: 2
+      incidental_min_total_matches: 1
+
+  - id: inflation_persistence
+    name: Inflation persistence and monetary policy convergence
+    description: >
+      Detects elevated institutional language around inflation persistence,
+      price stability, wage-price dynamics, and monetary tightening — directly
+      relevant to RBA policy and ASX rate-sensitive sectors.
+    primary_terms:
+      - inflation persistence
+      - price stability
+      - wage growth
+      - inflationary pressure
+      - monetary tightening
+      - interest rate
+      - cash rate
+      - rate hike
+      - rate cut
+    secondary_terms:
+      - core inflation
+      - headline inflation
+      - cpi
+      - services inflation
+      - inflation expectations
+      - neutral rate
+      - restrictive policy
+      - policy rate
+      - disinflation
+    exclusion_terms:
+      - stock tip
+      - trading signal
+    relevance_rules:
+      central_min_primary_matches: 1
+      central_min_total_matches: 2
+      incidental_min_total_matches: 1
