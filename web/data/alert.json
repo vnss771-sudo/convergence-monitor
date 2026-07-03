@@ -1,6 +1,6 @@
 {
   "confidence": "low",
-  "convergence_score": 0.4,
+  "convergence_score": 0.2,
   "document_count": 20,
   "evidence": [
     {
@@ -21,25 +21,6 @@
       "source_name": "European Central Bank",
       "title": "Piero Cipollone: Central bank money for the digital era",
       "url": "https://www.ecb.europa.eu//press/key/date/2026/html/ecb.sp260625~db26a75179.en.pdf"
-    },
-    {
-      "matched_terms": [
-        "instant payments"
-      ],
-      "published_at": "2026-06-24T08:00:00Z",
-      "quality_flags": [
-        "incidental_relevance",
-        "limited_support",
-        "secondary_terms_only",
-        "weak_keyword_match"
-      ],
-      "reason": "The scenario is mentioned incidentally because it matched 1 configured scenario term(s), below the central relevance threshold.",
-      "relevance": "incidental",
-      "source_category": "national_central_bank",
-      "source_id": "ecb",
-      "source_name": "European Central Bank",
-      "title": "Iceland joins TIPS for instant payments",
-      "url": "https://www.ecb.europa.eu//press/pr/date/2026/html/ecb.pr260624_1~ce8e85127f.en.html"
     }
   ],
   "generated_at": "2026-06-25T12:00:00Z",
