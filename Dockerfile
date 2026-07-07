@@ -9,8 +9,11 @@ RUN pip install --no-cache-dir -c constraints.txt -e .
 # Copy source
 COPY . .
 
-# Create data directories
-RUN mkdir -p data/raw data/processed data/runs data/baselines
+# Create data directories and non-root user
+RUN mkdir -p data/raw data/processed data/runs data/baselines \
+    && useradd --system --no-create-home appuser \
+    && chown -R appuser:appuser data
+USER appuser
 
 ENV LOG_LEVEL=INFO \
     REFRESH_INTERVAL_HOURS=6 \

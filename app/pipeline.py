@@ -97,6 +97,7 @@ def run_pipeline(
             )
             score_record = score_documents(
                 classified_docs,
+                bundle=bundle,
                 scenario_id=scenario_cfg.id,
                 window_days=window_days,
             )
