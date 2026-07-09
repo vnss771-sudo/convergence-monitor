@@ -48,5 +48,60 @@
     "date": "2026-06-28",
     "convergence_score": 0.4,
     "confidence": "low"
+  },
+  {
+    "date": "2026-06-29",
+    "convergence_score": 0.4,
+    "confidence": "low"
+  },
+  {
+    "date": "2026-06-30",
+    "convergence_score": 0.4,
+    "confidence": "low"
+  },
+  {
+    "date": "2026-07-01",
+    "convergence_score": 0.4,
+    "confidence": "low"
+  },
+  {
+    "date": "2026-07-02",
+    "convergence_score": 0.4,
+    "confidence": "low"
+  },
+  {
+    "date": "2026-07-03",
+    "convergence_score": 0.2,
+    "confidence": "low"
+  },
+  {
+    "date": "2026-07-04",
+    "convergence_score": 0.2,
+    "confidence": "low"
+  },
+  {
+    "date": "2026-07-05",
+    "convergence_score": 0.2,
+    "confidence": "low"
+  },
+  {
+    "date": "2026-07-06",
+    "convergence_score": 0.2,
+    "confidence": "low"
+  },
+  {
+    "date": "2026-07-07",
+    "convergence_score": 0.2,
+    "confidence": "low"
+  },
+  {
+    "date": "2026-07-08",
+    "convergence_score": 0.2,
+    "confidence": "low"
+  },
+  {
+    "date": "2026-07-09",
+    "convergence_score": 0.2,
+    "confidence": "low"
   }
 ]
