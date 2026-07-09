@@ -32,15 +32,12 @@ DEFAULT_OUTPUT_PATH = os.environ.get(
 # computing a weighted-average confidence from the matched source list.
 # Source IDs that do not appear here fall back to 0.1 (unknown/low-trust).
 SOURCE_WEIGHTS: dict[str, float] = {
-    "RBA": 1.00,
-    "APRA": 0.95,
-    "Treasury": 0.90,
-    "BIS": 0.90,
-    "IMF": 0.85,
-    "Fed": 0.75,
-    "ECB": 0.75,
-    "media": 0.35,
-    "blogs": 0.15,
+    # Keys must match the `name` field in config/sources.yaml exactly.
+    "Reserve Bank of Australia": 1.00,
+    "Bank for International Settlements": 0.90,
+    "International Monetary Fund": 0.85,
+    "Federal Reserve": 0.75,
+    "European Central Bank": 0.75,
 }
 
 LEVEL_THRESHOLDS = [

@@ -45,7 +45,7 @@ sources:
   type: rss
   enabled: true
   trust_weight: 0.85
-  url: https://www.ecb.europa.eu/rss/press.html
+  url: https://www.ecb.europa.eu/rss/press.xml
   timeout_seconds: 20.0
   fallback_urls:
-  - https://www.ecb.europa.eu/rss/speeches.html
+  - https://www.ecb.europa.eu/rss/speeches.xml
