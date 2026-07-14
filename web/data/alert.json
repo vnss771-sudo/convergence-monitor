@@ -3,7 +3,7 @@
   "convergence_score": 0.0,
   "document_count": 20,
   "evidence": [],
-  "generated_at": "2026-07-09T19:00:00Z",
+  "generated_at": "2026-07-13T17:00:00Z",
   "limitations": [
     "This alert reports public-document convergence only.",
     "It does not infer intent, coordination, causation, or future events."
