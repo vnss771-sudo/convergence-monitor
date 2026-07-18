@@ -1,8 +1,26 @@
 {
   "confidence": "low",
-  "convergence_score": 0.2,
+  "convergence_score": 0.4,
   "document_count": 20,
   "evidence": [
+    {
+      "matched_terms": [
+        "digital euro"
+      ],
+      "published_at": "2026-07-17T10:00:00Z",
+      "quality_flags": [
+        "incidental_relevance",
+        "limited_support",
+        "weak_keyword_match"
+      ],
+      "reason": "The scenario is mentioned incidentally because it matched 1 configured scenario term(s), below the central relevance threshold.",
+      "relevance": "incidental",
+      "source_category": "national_central_bank",
+      "source_id": "ecb",
+      "source_name": "European Central Bank",
+      "title": "Piero Cipollone: The cooperative spirit at the heart of the digital euro",
+      "url": "https://www.ecb.europa.eu//press/key/date/2026/html/ecb.sp260717~b6a156dc40.en.html"
+    },
     {
       "matched_terms": [
         "digital euro"
@@ -22,7 +40,7 @@
       "url": "https://www.ecb.europa.eu//press/pr/date/2026/html/ecb.pr260714~8cd07d9d45.en.html"
     }
   ],
-  "generated_at": "2026-07-14T09:00:00Z",
+  "generated_at": "2026-07-17T10:00:00Z",
   "limitations": [
     "This alert reports public-document convergence only.",
     "It does not infer intent, coordination, causation, or future events."
