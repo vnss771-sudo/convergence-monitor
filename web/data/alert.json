@@ -1,9 +1,28 @@
 {
   "confidence": "low",
-  "convergence_score": 0.0,
+  "convergence_score": 0.2,
   "document_count": 20,
-  "evidence": [],
-  "generated_at": "2026-07-29T18:00:00Z",
+  "evidence": [
+    {
+      "matched_terms": [
+        "digital euro"
+      ],
+      "published_at": "2026-07-30T08:00:00Z",
+      "quality_flags": [
+        "incidental_relevance",
+        "limited_support",
+        "weak_keyword_match"
+      ],
+      "reason": "The scenario is mentioned incidentally because it matched 1 configured scenario term(s), below the central relevance threshold.",
+      "relevance": "incidental",
+      "source_category": "national_central_bank",
+      "source_id": "ecb",
+      "source_name": "European Central Bank",
+      "title": "Digital euro app to incorporate highest accessibility standards",
+      "url": "https://www.ecb.europa.eu//press/pr/date/2026/html/ecb.pr260730~3b3bfbb565.en.html"
+    }
+  ],
+  "generated_at": "2026-07-30T08:00:00Z",
   "limitations": [
     "This alert reports public-document convergence only.",
     "It does not infer intent, coordination, causation, or future events."
@@ -11,7 +30,7 @@
   "scenario_id": "cbdc_payment_resilience",
   "scenario_name": "Cross-border CBDC and payment-system resilience convergence",
   "schema_version": "alert.v1",
-  "source_categories_active": 0,
+  "source_categories_active": 1,
   "summary": "Public institutional activity related to CBDC and payment-system resilience is limited in the classified source set.",
   "warnings": [
     "Baseline model is provisional.",
