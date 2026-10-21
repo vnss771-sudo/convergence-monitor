@@ -393,5 +393,10 @@
     "date": "2026-10-20",
     "convergence_score": 0.2,
     "confidence": "low"
+  },
+  {
+    "date": "2026-10-21",
+    "convergence_score": 0.0,
+    "confidence": "low"
   }
 ]
