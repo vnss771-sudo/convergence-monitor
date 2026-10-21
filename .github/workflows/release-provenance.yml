@@ -31,7 +31,7 @@ jobs:
         run: bash scripts/build_phase3_release.sh --repo-dir "$PWD"
 
       - name: Generate GitHub build provenance attestations
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: |
             dist/*.tar.gz
