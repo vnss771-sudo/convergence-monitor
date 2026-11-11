@@ -5,13 +5,12 @@
   "evidence": [
     {
       "matched_terms": [
-        "tokenisation"
+        "digital euro"
       ],
-      "published_at": "2026-10-29T15:50:00Z",
+      "published_at": "2026-11-10T14:00:00Z",
       "quality_flags": [
         "incidental_relevance",
         "limited_support",
-        "secondary_terms_only",
         "weak_keyword_match"
       ],
       "reason": "The scenario is mentioned incidentally because it matched 1 configured scenario term(s), below the central relevance threshold.",
@@ -19,11 +18,11 @@
       "source_category": "national_central_bank",
       "source_id": "ecb",
       "source_name": "European Central Bank",
-      "title": "Piero Cipollone: Next-day securities settlement, tokenisation and the transformation of Europe’s financial infrastructure",
-      "url": "https://www.ecb.europa.eu//press/key/date/2026/html/ecb.sp261029~e9b57c3495.en.html"
+      "title": "Piero Cipollone: Cash and the digital euro: two sides of the same coin",
+      "url": "https://www.ecb.europa.eu//press/key/date/2026/html/ecb.sp261110~9422461bad.en.html"
     }
   ],
-  "generated_at": "2026-10-29T15:50:00Z",
+  "generated_at": "2026-11-10T14:00:00Z",
   "limitations": [
     "This alert reports public-document convergence only.",
     "It does not infer intent, coordination, causation, or future events."
